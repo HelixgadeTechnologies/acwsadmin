@@ -7,9 +7,11 @@ import {
   Upload, 
   Download, 
   CheckCircle2, 
-  Clock
+  Clock,
+  Eye
 } from 'lucide-react';
 import CsvImportModal from './CsvImportModal';
+import AttendeeDetailsModal from './AttendeeDetailsModal';
 
 export default function AttendeesDirectory({
   initialAttendees,
@@ -25,6 +27,7 @@ export default function AttendeesDirectory({
   const [ticketFilter, setTicketFilter] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [isCsvModalOpen, setIsCsvModalOpen] = useState(false);
+  const [selectedAttendee, setSelectedAttendee] = useState<Attendee | null>(null);
 
   React.useEffect(() => {
     setAttendees(initialAttendees);
@@ -213,16 +216,28 @@ export default function AttendeesDirectory({
                       )}
                     </td>
                     <td className="py-5 pr-6 text-right">
-                      <button
-                        onClick={() => handleToggle(att._id)}
-                        className={`px-4 py-2 rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer ${
-                          att.checkedIn
-                            ? 'bg-[#FFF5F5] text-[#EF4444] border border-[#FCA5A5]/40 hover:bg-[#FEE2E2]'
-                            : 'bg-[#D4AF37] hover:bg-[#B58E29] text-[#070506]'
-                        }`}
-                      >
-                        {att.checkedIn ? 'Revoke Check-In' : 'Check In'}
-                      </button>
+                      <div className="flex items-center justify-end gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setSelectedAttendee(att)}
+                          className="px-3 py-2 rounded-xl bg-[#F4F7FE] hover:bg-[#EAEFFD] text-[#1B254B] border border-[#E0E5F2] font-bold text-xs flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs"
+                        >
+                          <Eye className="w-4 h-4 text-[#B58E29]" />
+                          <span>View</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => handleToggle(att._id)}
+                          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer ${
+                            att.checkedIn
+                              ? 'bg-[#FFF5F5] text-[#EF4444] border border-[#FCA5A5]/40 hover:bg-[#FEE2E2]'
+                              : 'bg-[#D4AF37] hover:bg-[#B58E29] text-[#070506]'
+                          }`}
+                        >
+                          {att.checkedIn ? 'Revoke Check-In' : 'Check In'}
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))
@@ -231,6 +246,21 @@ export default function AttendeesDirectory({
           </table>
         </div>
       </div>
+
+      {/* Attendee Details Modal */}
+      <AttendeeDetailsModal
+        attendee={selectedAttendee}
+        isOpen={!!selectedAttendee}
+        onClose={() => setSelectedAttendee(null)}
+        onToggleCheckin={async (id) => {
+          await handleToggle(id);
+          setSelectedAttendee(prev => prev ? {
+            ...prev,
+            checkedIn: !prev.checkedIn,
+            checkedInAt: !prev.checkedIn ? new Date().toISOString() : null
+          } : null);
+        }}
+      />
 
       {/* CSV Import Modal */}
       <CsvImportModal

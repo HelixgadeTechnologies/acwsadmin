@@ -38,9 +38,10 @@ export interface Attendee {
   partnerName?: string;
   email: string;
   phone?: string;
-  ticketType: 'standard' | 'vip' | 'catwalk-exclusive';
+  ticketType: 'standard' | 'vip' | 'catwalk-exclusive' | string;
+  ticketPrice?: string;
   pricePaid?: number;
-  paymentStatus?: 'paid' | 'pending' | 'complimentary';
+  paymentStatus?: 'paid' | 'pending' | 'complimentary' | string;
   weddingDate?: string;
   fastTrackPass?: boolean;
   checkedIn: boolean;
@@ -48,6 +49,17 @@ export interface Attendee {
   registeredAt?: string;
   createdAt?: string;
   updatedAt?: string;
+  attendeeType?: string;
+  weddingTimeframe?: string;
+  weddingLocation?: string;
+  weddingBudget?: string;
+  guestCount?: string;
+  servicesNeeded?: string[];
+  culturalInfluences?: string[];
+  discoveryChannel?: string;
+  privacyAcknowledged?: boolean;
+  marketingConsent?: boolean;
+  partnerConsent?: boolean;
 }
 
 export interface KpiStats {
