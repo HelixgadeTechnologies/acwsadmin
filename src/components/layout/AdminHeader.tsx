@@ -97,10 +97,9 @@ export default function AdminHeader({
           {/* Notification Bell */}
           <button 
             title="Curator Notifications"
-            className="relative p-2 rounded-xl bg-[#F4F7FE] border border-[#E0E5F2] text-[#707EAE] hover:text-[#1B254B] transition-colors cursor-pointer"
+            className="p-2 rounded-xl bg-[#F4F7FE] border border-[#E0E5F2] text-[#707EAE] hover:text-[#1B254B] transition-colors cursor-pointer"
           >
             <Bell className="w-4 h-4" />
-            <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#D4AF37]" />
           </button>
 
           {/* Admin Profile Pill */}

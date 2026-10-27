@@ -95,7 +95,7 @@ export class ApiService {
     } catch {
       // Graceful fallback to maintain instant client state
       const stored = typeof window !== 'undefined' ? localStorage.getItem('acws_admin_user') : null;
-      const current = stored ? JSON.parse(stored) : { _id: 'admin-id', name: data.name, email: 'admin@acws.co.uk', role: 'admin' };
+      const current = stored ? JSON.parse(stored) : { _id: '', name: data.name, email: '', role: 'admin' };
       return { ...current, name: data.name };
     }
   }
@@ -127,8 +127,7 @@ export class ApiService {
       const totalAttendees = aData.total ?? attendees.length;
       const checkedInCount = attendees.filter((a: any) => a.checkedIn).length;
       
-      const calculatedRevenue = attendees.reduce((acc: number, a: any) => acc + (a.pricePaid || 0), 0) +
-        ((vData.approved || 0) * 1250);
+      const calculatedRevenue = attendees.reduce((acc: number, a: any) => acc + (a.pricePaid || 0), 0);
 
       return {
         totalVendors: vData.total || 0,

@@ -10,8 +10,7 @@ import {
   Users, 
   Settings, 
   LogOut, 
-  ShieldCheck,
-  Sparkles
+  ShieldCheck
 } from 'lucide-react';
 
 export default function AdminSidebar({ 
@@ -125,16 +124,6 @@ export default function AdminSidebar({
             );
           })}
         </nav>
-
-        {/* Event Meta Status Card */}
-        <div className="mx-4 mb-4 p-3.5 rounded-2xl bg-[#F4F7FE] border border-[#E0E5F2]">
-          <div className="flex items-center gap-2 text-xs font-bold text-[#B58E29] mb-1">
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>Exhibition Dates</span>
-          </div>
-          <p className="text-xs text-[#1B254B] font-bold">May 15–16, 2027</p>
-          <p className="text-[11px] text-[#A3AED0]">ExCeL London • Royal Docks</p>
-        </div>
 
         {/* User Identity & Logout */}
         <div className="p-4 border-t border-[#E0E5F2] bg-white">

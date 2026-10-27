@@ -46,8 +46,9 @@ export default function CsvImportModal({
       const parts = lines[i].split(delimiter).map(p => p.trim().replace(/^["']|["']$/g, ''));
       if (parts.length === 0 || parts.every(p => !p)) continue;
 
-      const fullName = (nameIdx !== -1 ? parts[nameIdx] : '') || parts[0] || 'Guest';
-      const email = (emailIdx !== -1 ? parts[emailIdx] : '') || `guest${i}@example.com`;
+      const fullName = (nameIdx !== -1 ? parts[nameIdx] : '') || parts[0] || '';
+      const email = emailIdx !== -1 ? parts[emailIdx] : '';
+      if (!fullName && !email) continue;
       const phone = phoneIdx !== -1 ? parts[phoneIdx] : '';
       const rawTicket = ticketIdx !== -1 ? parts[ticketIdx].toLowerCase() : 'standard';
       const partnerName = partnerIdx !== -1 ? parts[partnerIdx] : '';
@@ -62,7 +63,7 @@ export default function CsvImportModal({
         phone,
         partnerName,
         ticketType,
-        pricePaid: ticketType === 'catwalk-exclusive' ? 85 : (ticketType === 'vip' ? 65 : 25),
+        pricePaid: 0,
         paymentStatus: 'paid' as const,
         fastTrackPass: ticketType !== 'standard'
       });
