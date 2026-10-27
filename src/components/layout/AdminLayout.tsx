@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import AdminSidebar from './AdminSidebar';
 import AdminHeader from './AdminHeader';
+import MobileBottomNav from './MobileBottomNav';
 import { ApiService } from '@/lib/api';
 
 export default function AdminLayout({
@@ -54,7 +55,7 @@ export default function AdminLayout({
 
   return (
     <div className="min-h-screen bg-white text-[#1B254B]">
-      {/* Sidebar */}
+      {/* Sidebar (Desktop + Mobile Slide-out Drawer) */}
       <AdminSidebar
         vendorCount={vendorCount}
         attendeeCount={attendeeCount}
@@ -71,10 +72,17 @@ export default function AdminLayout({
           onRefresh={onRefresh}
         />
 
-        <main className="flex-1 px-4 lg:px-8 py-6 w-full">
+        <main className="flex-1 px-4 lg:px-8 py-6 pb-24 lg:pb-6 w-full">
           {children}
         </main>
+
+        {/* Mobile Native Bottom Navigation Bar */}
+        <MobileBottomNav
+          vendorCount={vendorCount}
+          attendeeCount={attendeeCount}
+        />
       </div>
     </div>
   );
 }
+

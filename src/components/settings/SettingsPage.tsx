@@ -16,7 +16,10 @@ import {
   ShieldCheck,
   Mail,
   KeyRound,
-  AlertCircle
+  AlertCircle,
+  Smartphone,
+  Wifi,
+  Share
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { ApiService } from '@/lib/api';
@@ -26,6 +29,17 @@ export default function SettingsPage() {
 
   // Active Tab: 'profile' | 'operations'
   const [activeTab, setActiveTab] = useState<'profile' | 'operations'>('profile');
+  const [isPwaInstalled, setIsPwaInstalled] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const isStandalone = 
+        window.matchMedia('(display-mode: standalone)').matches ||
+        // @ts-expect-error - iOS Safari specific property
+        (typeof window.navigator !== 'undefined' && window.navigator.standalone === true);
+      setIsPwaInstalled(isStandalone);
+    }
+  }, []);
 
   // Admin Profile State
   const [fullName, setFullName] = useState(user?.name || '');
@@ -436,6 +450,58 @@ export default function SettingsPage() {
                 </button>
               </div>
             </form>
+          </div>
+
+          {/* Mobile Phone Access & PWA Status Card */}
+          <div className="bg-white border border-[#E0E5F2] rounded-2xl p-6 shadow-xs">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-[#1B254B] text-[#D4AF37] flex items-center justify-center border border-[#D4AF37]/30 shrink-0">
+                  <Smartphone className="w-5 h-5" />
+                </div>
+                <div>
+                  <h4 className="text-sm font-bold text-[#1B254B]">Mobile Phone Access & PWA</h4>
+                  <p className="text-xs text-[#A3AED0]">Install ACWS Admin on your smartphone for 1-tap full-screen access</p>
+                </div>
+              </div>
+              <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider self-start sm:self-auto ${
+                isPwaInstalled 
+                  ? 'bg-[#10B981]/15 text-[#10B981] border border-[#10B981]/30' 
+                  : 'bg-[#FFF9E6] text-[#8F6E1C] border border-[#F3DC82]'
+              }`}>
+                {isPwaInstalled ? 'Installed as App' : 'PWA Ready'}
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs mt-4">
+              <div className="p-4 rounded-xl bg-[#F4F7FE] border border-[#E0E5F2]">
+                <div className="flex items-center gap-2 font-bold text-[#1B254B] mb-2">
+                  <span className="w-2 h-2 rounded-full bg-[#10B981]"></span>
+                  <span>Android (Chrome & Edge)</span>
+                </div>
+                <p className="text-[11px] text-[#707EAE] leading-relaxed">
+                  Look for the <strong>&quot;Install App&quot;</strong> banner at the bottom of your screen, or open the browser menu (⋮) and tap <strong>&quot;Install app&quot;</strong> or <strong>&quot;Add to Home screen&quot;</strong>.
+                </p>
+              </div>
+
+              <div className="p-4 rounded-xl bg-[#F4F7FE] border border-[#E0E5F2]">
+                <div className="flex items-center gap-2 font-bold text-[#1B254B] mb-2">
+                  <span className="w-2 h-2 rounded-full bg-[#3B82F6]"></span>
+                  <span>iPhone & iPad (Safari)</span>
+                </div>
+                <p className="text-[11px] text-[#707EAE] leading-relaxed">
+                  Tap Safari&apos;s <strong>Share</strong> button <Share className="w-3 h-3 inline mx-0.5 text-[#3B82F6]" /> in the browser bar, scroll down, and tap <strong>&quot;Add to Home Screen&quot;</strong> ⊕.
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-4 pt-4 border-t border-[#E0E5F2] flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+              <div className="flex items-center gap-2 text-[#707EAE] text-[11px]">
+                <Wifi className="w-3.5 h-3.5 text-[#10B981]" />
+                <span>Offline caching active • Responsive bottom mobile navigation enabled</span>
+              </div>
+              <span className="text-[11px] font-mono text-[#A3AED0]">PWA Engine v1.0.0</span>
+            </div>
           </div>
         </div>
       )}
