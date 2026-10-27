@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Link from 'next/link';
 import { Attendee } from '@/types';
 import { 
   Search, 
@@ -11,7 +12,6 @@ import {
   Eye
 } from 'lucide-react';
 import CsvImportModal from './CsvImportModal';
-import AttendeeDetailsModal from './AttendeeDetailsModal';
 
 export default function AttendeesDirectory({
   initialAttendees,
@@ -27,7 +27,6 @@ export default function AttendeesDirectory({
   const [ticketFilter, setTicketFilter] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [isCsvModalOpen, setIsCsvModalOpen] = useState(false);
-  const [selectedAttendee, setSelectedAttendee] = useState<Attendee | null>(null);
 
   React.useEffect(() => {
     setAttendees(initialAttendees);
@@ -178,11 +177,21 @@ export default function AttendeesDirectory({
               ) : (
                 filteredAttendees.map((att) => (
                   <tr key={att._id} className="hover:bg-[#F4F7FE] transition-colors">
-                    <td className="py-5 pl-6 font-mono font-bold text-[#B58E29] text-sm">
-                      {att.refCode}
+                    <td className="py-5 pl-6 font-mono font-bold text-sm">
+                      <Link 
+                        href={`/attendees/${att._id}`}
+                        className="text-[#B58E29] hover:underline"
+                      >
+                        {att.refCode}
+                      </Link>
                     </td>
                     <td className="py-5 px-4">
-                      <div className="font-bold text-[#1B254B] text-base">{att.fullName}</div>
+                      <Link 
+                        href={`/attendees/${att._id}`}
+                        className="font-bold text-[#1B254B] hover:text-[#B58E29] text-base transition-colors"
+                      >
+                        {att.fullName}
+                      </Link>
                       {att.partnerName && (
                         <div className="text-xs text-[#707EAE] mt-0.5">Partner: {att.partnerName}</div>
                       )}
@@ -217,14 +226,13 @@ export default function AttendeesDirectory({
                     </td>
                     <td className="py-5 pr-6 text-right">
                       <div className="flex items-center justify-end gap-2">
-                        <button
-                          type="button"
-                          onClick={() => setSelectedAttendee(att)}
+                        <Link
+                          href={`/attendees/${att._id}`}
                           className="px-3 py-2 rounded-xl bg-[#F4F7FE] hover:bg-[#EAEFFD] text-[#1B254B] border border-[#E0E5F2] font-bold text-xs flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs"
                         >
                           <Eye className="w-4 h-4 text-[#B58E29]" />
                           <span>View</span>
-                        </button>
+                        </Link>
 
                         <button
                           type="button"
@@ -246,21 +254,6 @@ export default function AttendeesDirectory({
           </table>
         </div>
       </div>
-
-      {/* Attendee Details Modal */}
-      <AttendeeDetailsModal
-        attendee={selectedAttendee}
-        isOpen={!!selectedAttendee}
-        onClose={() => setSelectedAttendee(null)}
-        onToggleCheckin={async (id) => {
-          await handleToggle(id);
-          setSelectedAttendee(prev => prev ? {
-            ...prev,
-            checkedIn: !prev.checkedIn,
-            checkedInAt: !prev.checkedIn ? new Date().toISOString() : null
-          } : null);
-        }}
-      />
 
       {/* CSV Import Modal */}
       <CsvImportModal

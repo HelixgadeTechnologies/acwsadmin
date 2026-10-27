@@ -246,6 +246,21 @@ export class ApiService {
     }
   }
 
+  static async getAttendeeById(id: string): Promise<Attendee | null> {
+    try {
+      const res = await this.request<{ data: any }>(`/admin/attendees/${id}`);
+      if (res.data) return normalizeAttendee(res.data);
+    } catch {
+      // Fallback if direct single endpoint is not implemented
+    }
+    try {
+      const attendees = await this.getAttendees({ limit: 1000 });
+      return attendees.find(a => a._id === id || a.refCode === id) || null;
+    } catch {
+      return null;
+    }
+  }
+
   static async toggleAttendeeCheckin(id: string): Promise<Attendee> {
     const res = await this.request<{ data: any }>(`/admin/attendees/${id}/checkin`, {
       method: 'PATCH'
