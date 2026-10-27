@@ -1,9 +1,9 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { Vendor } from '@/types';
-import { ArrowRight, Eye, Check, X } from 'lucide-react';
+import { ArrowRight, Eye, Check, X, MoreVertical, Clock } from 'lucide-react';
 
 export default function RecentApplicationsTable({
   vendors,
@@ -12,6 +12,23 @@ export default function RecentApplicationsTable({
   vendors: Vendor[];
   onStatusChange: (id: string, status: 'approved' | 'rejected' | 'waitlisted') => void;
 }) {
+  const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setOpenDropdownId(null);
+      }
+    };
+    if (openDropdownId) {
+      document.addEventListener('click', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('click', handleClickOutside);
+    };
+  }, [openDropdownId]);
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'approved':
@@ -41,7 +58,7 @@ export default function RecentApplicationsTable({
         </Link>
       </div>
 
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto min-h-[300px] pb-10">
         <table className="w-full text-left text-sm">
           <thead>
             <tr className="border-b border-[#E0E5F2] text-[#A3AED0] font-bold uppercase tracking-wider text-xs">
@@ -87,24 +104,88 @@ export default function RecentApplicationsTable({
                         <Eye className="w-4 h-4" />
                         <span>View</span>
                       </Link>
-                      {v.status !== 'approved' && (
+
+                      {/* Dropdown Menu for Approve / Reject / Waitlist */}
+                      <div className="relative">
                         <button
-                          onClick={() => onStatusChange(v._id, 'approved')}
-                          className="p-1.5 rounded-xl bg-[#10B981]/15 text-[#10B981] hover:bg-[#10B981]/25 border border-[#10B981]/30 cursor-pointer"
-                          title="Approve"
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setOpenDropdownId(openDropdownId === v._id ? null : v._id);
+                          }}
+                          className={`p-1.5 rounded-xl border transition-colors flex items-center justify-center cursor-pointer ${
+                            openDropdownId === v._id
+                              ? 'bg-[#1B254B] text-white border-[#1B254B]'
+                              : 'bg-[#F4F7FE] hover:bg-[#E0E5F2] text-[#707EAE] hover:text-[#1B254B] border-[#E0E5F2]'
+                          }`}
+                          title="Application Actions"
+                          aria-label="Application Actions"
                         >
-                          <Check className="w-4 h-4" />
+                          <MoreVertical className="w-4 h-4" />
                         </button>
-                      )}
-                      {v.status !== 'rejected' && (
-                        <button
-                          onClick={() => onStatusChange(v._id, 'rejected')}
-                          className="p-1.5 rounded-xl bg-[#EF4444]/15 text-[#EF4444] hover:bg-[#EF4444]/25 border border-[#EF4444]/30 cursor-pointer"
-                          title="Reject"
-                        >
-                          <X className="w-4 h-4" />
-                        </button>
-                      )}
+
+                        {openDropdownId === v._id && (
+                          <div
+                            ref={dropdownRef}
+                            className="absolute right-0 top-full mt-1.5 w-48 bg-white rounded-2xl shadow-xl border border-[#E0E5F2] py-2 z-50 text-left animate-in fade-in zoom-in-95 duration-100"
+                          >
+                            <div className="px-3.5 py-1 text-[10px] font-bold text-[#A3AED0] uppercase tracking-wider border-b border-[#E0E5F2] mb-1">
+                              Decisions
+                            </div>
+
+                            <button
+                              type="button"
+                              onClick={() => {
+                                onStatusChange(v._id, 'approved');
+                                setOpenDropdownId(null);
+                              }}
+                              disabled={v.status === 'approved'}
+                              className={`w-full px-3.5 py-2 text-xs font-bold flex items-center gap-2.5 transition-colors cursor-pointer ${
+                                v.status === 'approved'
+                                  ? 'opacity-40 cursor-not-allowed text-[#A3AED0]'
+                                  : 'text-[#10B981] hover:bg-[#10B981]/10'
+                              }`}
+                            >
+                              <Check className="w-4 h-4 text-[#10B981]" />
+                              <span>Approve Application</span>
+                            </button>
+
+                            <button
+                              type="button"
+                              onClick={() => {
+                                onStatusChange(v._id, 'rejected');
+                                setOpenDropdownId(null);
+                              }}
+                              disabled={v.status === 'rejected'}
+                              className={`w-full px-3.5 py-2 text-xs font-bold flex items-center gap-2.5 transition-colors cursor-pointer ${
+                                v.status === 'rejected'
+                                  ? 'opacity-40 cursor-not-allowed text-[#A3AED0]'
+                                  : 'text-[#EF4444] hover:bg-[#EF4444]/10'
+                              }`}
+                            >
+                              <X className="w-4 h-4 text-[#EF4444]" />
+                              <span>Reject Application</span>
+                            </button>
+
+                            <button
+                              type="button"
+                              onClick={() => {
+                                onStatusChange(v._id, 'waitlisted');
+                                setOpenDropdownId(null);
+                              }}
+                              disabled={v.status === 'waitlisted'}
+                              className={`w-full px-3.5 py-2 text-xs font-bold flex items-center gap-2.5 transition-colors cursor-pointer ${
+                                v.status === 'waitlisted'
+                                  ? 'opacity-40 cursor-not-allowed text-[#A3AED0]'
+                                  : 'text-[#F59E0B] hover:bg-[#F59E0B]/10'
+                              }`}
+                            >
+                              <Clock className="w-4 h-4 text-[#F59E0B]" />
+                              <span>Place on Waitlist</span>
+                            </button>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </td>
                 </tr>
@@ -116,3 +197,4 @@ export default function RecentApplicationsTable({
     </div>
   );
 }
+
