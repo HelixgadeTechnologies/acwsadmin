@@ -14,16 +14,31 @@ function AttendeeProfileContent({
   params: Promise<{ id: string }>;
 }) {
   const resolvedParams = use(params);
-  const attendeeId = resolvedParams.id;
+  const attendeeId = decodeURIComponent(resolvedParams.id || '').trim();
 
-  const [attendee, setAttendee] = useState<Attendee | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [attendee, setAttendee] = useState<Attendee | null>(() => {
+    if (typeof window !== 'undefined' && attendeeId) {
+      try {
+        const cached = sessionStorage.getItem(`acws_attendee_${attendeeId}`);
+        if (cached) return JSON.parse(cached);
+      } catch {}
+    }
+    return null;
+  });
+  const [loading, setLoading] = useState<boolean>(!attendee);
 
   const loadAttendee = async () => {
-    setLoading(true);
+    if (!attendee) setLoading(true);
     try {
       const data = await ApiService.getAttendeeById(attendeeId);
-      setAttendee(data);
+      if (data) {
+        setAttendee(data);
+        if (typeof window !== 'undefined') {
+          sessionStorage.setItem(`acws_attendee_${attendeeId}`, JSON.stringify(data));
+          if (data._id) sessionStorage.setItem(`acws_attendee_${data._id}`, JSON.stringify(data));
+          if (data.refCode) sessionStorage.setItem(`acws_attendee_${data.refCode}`, JSON.stringify(data));
+        }
+      }
     } catch (err) {
       console.error('Failed to load attendee:', err);
     } finally {

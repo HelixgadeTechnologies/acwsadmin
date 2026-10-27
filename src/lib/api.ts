@@ -21,6 +21,7 @@ function normalizeAttendee(a: any): Attendee {
   if (!a) return a;
   return {
     ...a,
+    _id: a._id || a.id || '',
     registeredAt: a.registeredAt || a.createdAt || new Date().toISOString(),
     checkedIn: Boolean(a.checkedIn)
   };
@@ -117,7 +118,7 @@ export class ApiService {
     try {
       const [vendorsRes, attendeesRes] = await Promise.allSettled([
         this.getVendors({ limit: 100 }),
-        this.request<{ data: { attendees: any[]; total: number } }>('/admin/attendees?limit=1000')
+        this.request<{ data: { attendees: any[]; total: number } }>('/admin/attendees?limit=100')
       ]);
 
       const vendors = vendorsRes.status === 'fulfilled' ? vendorsRes.value.vendors : [];
@@ -229,7 +230,9 @@ export class ApiService {
     try {
       const query = new URLSearchParams();
       if (params.page) query.set('page', params.page.toString());
-      if (params.limit) query.set('limit', params.limit.toString());
+      // Render backend validation enforces limit <= 100
+      const limitVal = params.limit ? Math.min(params.limit, 100) : 100;
+      query.set('limit', limitVal.toString());
       if (params.search) query.set('search', params.search);
       if (params.ticketType && params.ticketType !== 'all') query.set('ticketType', params.ticketType);
       if (params.checkedIn !== undefined) query.set('checkedIn', String(params.checkedIn));
@@ -247,15 +250,39 @@ export class ApiService {
   }
 
   static async getAttendeeById(id: string): Promise<Attendee | null> {
+    if (!id) return null;
+    const cleanId = decodeURIComponent(id).trim();
+
+    // 1. Try single attendee endpoint if available
     try {
-      const res = await this.request<{ data: any }>(`/admin/attendees/${id}`);
-      if (res.data) return normalizeAttendee(res.data);
+      const res = await this.request<{ data: any }>(`/admin/attendees/${cleanId}`);
+      if (res?.data) return normalizeAttendee(res.data);
     } catch {
-      // Fallback if direct single endpoint is not implemented
+      // 404 Route not found on backend is expected
     }
+
+    // 2. If it is a reference code, search backend directly
+    if (cleanId.includes('ATT') || cleanId.startsWith('ACWS')) {
+      try {
+        const searched = await this.getAttendees({ search: cleanId, limit: 10 });
+        const match = searched.find(a => 
+          a.refCode.toLowerCase() === cleanId.toLowerCase() || 
+          a._id === cleanId
+        );
+        if (match) return match;
+      } catch {
+        // Fallback to list
+      }
+    }
+
+    // 3. Fallback: fetch current attendee list (cap at 100) and find by _id or refCode
     try {
-      const attendees = await this.getAttendees({ limit: 1000 });
-      return attendees.find(a => a._id === id || a.refCode === id) || null;
+      const attendees = await this.getAttendees({ limit: 100 });
+      return attendees.find(a => 
+        a._id === cleanId || 
+        a.refCode.toLowerCase() === cleanId.toLowerCase() ||
+        (a._id && a._id.toLowerCase() === cleanId.toLowerCase())
+      ) || null;
     } catch {
       return null;
     }

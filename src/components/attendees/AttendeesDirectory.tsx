@@ -77,6 +77,15 @@ export default function AttendeesDirectory({
     document.body.removeChild(link);
   };
 
+  const handleCacheAttendee = (att: Attendee) => {
+    if (typeof window !== 'undefined') {
+      try {
+        if (att._id) sessionStorage.setItem(`acws_attendee_${att._id}`, JSON.stringify(att));
+        if (att.refCode) sessionStorage.setItem(`acws_attendee_${att.refCode}`, JSON.stringify(att));
+      } catch {}
+    }
+  };
+
   return (
     <div className="space-y-6 w-full">
       {/* Top Action Bar */}
@@ -175,64 +184,69 @@ export default function AttendeesDirectory({
                   </td>
                 </tr>
               ) : (
-                filteredAttendees.map((att) => (
-                  <tr key={att._id} className="hover:bg-[#F4F7FE] transition-colors">
-                    <td className="py-5 pl-6 font-mono font-bold text-sm">
-                      <Link 
-                        href={`/attendees/${att._id}`}
-                        className="text-[#B58E29] hover:underline"
-                      >
-                        {att.refCode}
-                      </Link>
-                    </td>
-                    <td className="py-5 px-4">
-                      <Link 
-                        href={`/attendees/${att._id}`}
-                        className="font-bold text-[#1B254B] hover:text-[#B58E29] text-base transition-colors"
-                      >
-                        {att.fullName}
-                      </Link>
-                      {att.partnerName && (
-                        <div className="text-xs text-[#707EAE] mt-0.5">Partner: {att.partnerName}</div>
-                      )}
-                    </td>
-                    <td className="py-5 px-4">
-                      <div className="text-[#1B254B] font-medium text-sm">{att.email}</div>
-                      {att.phone && <div className="text-xs text-[#707EAE] mt-0.5">{att.phone}</div>}
-                    </td>
-                    <td className="py-5 px-4 capitalize">
-                      <span className={`px-3.5 py-1.5 rounded-full text-xs font-bold border ${
-                        att.ticketType === 'vip' 
-                          ? 'bg-[#FFF9E6] text-[#8F6E1C] border-[#F3DC82]'
-                          : (att.ticketType === 'catwalk-exclusive' 
-                            ? 'bg-[#F5F3FF] text-[#6D28D9] border-[#DDD6FE]'
-                            : 'bg-[#F4F7FE] text-[#2B3674] border-[#E0E5F2]')
-                      }`}>
-                        {att.ticketType.replace('-', ' ')}
-                      </span>
-                    </td>
-                    <td className="py-5 px-4">
-                      {att.checkedIn ? (
-                        <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold bg-[#10B981]/15 text-[#10B981] border border-[#10B981]/30">
-                          <CheckCircle2 className="w-4 h-4" />
-                          <span>Checked In</span>
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold bg-[#707EAE]/15 text-[#707EAE] border border-[#707EAE]/30">
-                          <Clock className="w-4 h-4" />
-                          <span>Pending Arrival</span>
-                        </span>
-                      )}
-                    </td>
-                    <td className="py-5 pr-6 text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <Link
-                          href={`/attendees/${att._id}`}
-                          className="px-3 py-2 rounded-xl bg-[#F4F7FE] hover:bg-[#EAEFFD] text-[#1B254B] border border-[#E0E5F2] font-bold text-xs flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs"
+                filteredAttendees.map((att) => {
+                  const attendeeRouteId = att._id || att.refCode;
+                  return (
+                    <tr key={att._id || att.refCode} className="hover:bg-[#F4F7FE] transition-colors">
+                      <td className="py-5 pl-6 font-mono font-bold text-sm">
+                        <Link 
+                          href={`/attendees/${attendeeRouteId}`}
+                          onClick={() => handleCacheAttendee(att)}
+                          className="text-[#B58E29] hover:underline"
                         >
-                          <Eye className="w-4 h-4 text-[#B58E29]" />
-                          <span>View</span>
+                          {att.refCode}
                         </Link>
+                      </td>
+                      <td className="py-5 px-4">
+                        <Link 
+                          href={`/attendees/${attendeeRouteId}`}
+                          onClick={() => handleCacheAttendee(att)}
+                          className="font-bold text-[#1B254B] hover:text-[#B58E29] text-base transition-colors block"
+                        >
+                          {att.fullName}
+                        </Link>
+                        {att.partnerName && (
+                          <div className="text-xs text-[#707EAE] mt-0.5">Partner: {att.partnerName}</div>
+                        )}
+                      </td>
+                      <td className="py-5 px-4">
+                        <div className="text-[#1B254B] font-medium text-sm">{att.email}</div>
+                        {att.phone && <div className="text-xs text-[#707EAE] mt-0.5">{att.phone}</div>}
+                      </td>
+                      <td className="py-5 px-4 capitalize">
+                        <span className={`px-3.5 py-1.5 rounded-full text-xs font-bold border ${
+                          att.ticketType === 'vip' 
+                            ? 'bg-[#FFF9E6] text-[#8F6E1C] border-[#F3DC82]'
+                            : (att.ticketType === 'catwalk-exclusive' 
+                              ? 'bg-[#F5F3FF] text-[#6D28D9] border-[#DDD6FE]'
+                              : 'bg-[#F4F7FE] text-[#2B3674] border-[#E0E5F2]')
+                        }`}>
+                          {att.ticketType.replace('-', ' ')}
+                        </span>
+                      </td>
+                      <td className="py-5 px-4">
+                        {att.checkedIn ? (
+                          <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold bg-[#10B981]/15 text-[#10B981] border border-[#10B981]/30">
+                            <CheckCircle2 className="w-4 h-4" />
+                            <span>Checked In</span>
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold bg-[#707EAE]/15 text-[#707EAE] border border-[#707EAE]/30">
+                            <Clock className="w-4 h-4" />
+                            <span>Pending Arrival</span>
+                          </span>
+                        )}
+                      </td>
+                      <td className="py-5 pr-6 text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          <Link
+                            href={`/attendees/${attendeeRouteId}`}
+                            onClick={() => handleCacheAttendee(att)}
+                            className="px-3 py-2 rounded-xl bg-[#F4F7FE] hover:bg-[#EAEFFD] text-[#1B254B] border border-[#E0E5F2] font-bold text-xs flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs"
+                          >
+                            <Eye className="w-4 h-4 text-[#B58E29]" />
+                            <span>View</span>
+                          </Link>
 
                         <button
                           type="button"
@@ -248,8 +262,9 @@ export default function AttendeesDirectory({
                       </div>
                     </td>
                   </tr>
-                ))
-              )}
+                );
+              })
+            )}
             </tbody>
           </table>
         </div>
