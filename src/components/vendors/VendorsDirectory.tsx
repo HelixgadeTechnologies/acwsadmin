@@ -252,8 +252,8 @@ export default function VendorsDirectory({
             <tbody className="divide-y divide-[#E0E5F2]">
               {paginatedVendors.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="text-center py-16 text-[#A3AED0] text-sm">
-                    No vendors matching current filter criteria.
+                  <td colSpan={7} className="text-center py-16 text-[#A3AED0] text-sm font-semibold">
+                    No data
                   </td>
                 </tr>
               ) : (

@@ -319,13 +319,13 @@ export default function VendorProfileView({
               </div>
               <div className="border-x border-[#E0E5F2]">
                 <p className="text-xl font-bold text-[#2B3674]">
-                  {vendor.weddingVolume && vendor.weddingVolume !== 'Not specified' ? vendor.weddingVolume.split(' ')[0] : '—'}
+                  {vendor.weddingVolume && vendor.weddingVolume !== 'Not specified' ? vendor.weddingVolume.split(' ')[0] : 'No data'}
                 </p>
                 <p className="text-xs font-medium text-[#A3AED0] mt-0.5">Weddings/Yr</p>
               </div>
               <div>
                 <p className="text-xl font-bold text-[#2B3674]">
-                  {vendor.typicalSpend && vendor.typicalSpend !== 'Not specified' ? vendor.typicalSpend.split(' ')[0] : '—'}
+                  {vendor.typicalSpend && vendor.typicalSpend !== 'Not specified' ? vendor.typicalSpend.split(' ')[0] : 'No data'}
                 </p>
                 <p className="text-xs font-medium text-[#A3AED0] mt-0.5">Avg. Spend</p>
               </div>
@@ -561,7 +561,7 @@ export default function VendorProfileView({
                   <div>
                     <p className="text-sm font-bold text-[#2B3674]">Official Website</p>
                     <p className="text-xs text-[#A3AED0] truncate max-w-[150px]">
-                      {vendor.website || 'No website registered'}
+                      {vendor.website || 'No data'}
                     </p>
                   </div>
                 </div>
@@ -570,7 +570,7 @@ export default function VendorProfileView({
                     <ExternalLink className="w-4 h-4" />
                   </a>
                 ) : (
-                  <span className="text-[11px] text-[#A3AED0]">N/A</span>
+                  <span className="text-[11px] text-[#A3AED0] font-semibold">No data</span>
                 )}
               </div>
 
@@ -585,14 +585,16 @@ export default function VendorProfileView({
                   <div>
                     <p className="text-sm font-bold text-[#2B3674]">Instagram</p>
                     <p className="text-xs text-[#A3AED0]">
-                      {vendor.instagram || 'No handle provided'}
+                      {vendor.instagram || 'No data'}
                     </p>
                   </div>
                 </div>
-                {vendor.instagram && (
+                {vendor.instagram ? (
                   <a href={`https://instagram.com/${vendor.instagram.replace('@', '')}`} target="_blank" rel="noreferrer" className="p-2 rounded-lg bg-[#D4AF37] hover:bg-[#B58E29] text-[#070506] font-bold transition-colors">
                     <ExternalLink className="w-4 h-4" />
                   </a>
+                ) : (
+                  <span className="text-[11px] text-[#A3AED0] font-semibold">No data</span>
                 )}
               </div>
 
@@ -605,13 +607,17 @@ export default function VendorProfileView({
                   <div>
                     <p className="text-sm font-bold text-[#2B3674]">Primary Email</p>
                     <p className="text-xs text-[#A3AED0] truncate max-w-[150px]">
-                      {vendor.email}
+                      {vendor.email || 'No data'}
                     </p>
                   </div>
                 </div>
-                <a href={`mailto:${vendor.email}`} className="p-2 rounded-lg bg-[#D4AF37] hover:bg-[#B58E29] text-[#070506] font-bold transition-colors">
-                  <ExternalLink className="w-4 h-4" />
-                </a>
+                {vendor.email ? (
+                  <a href={`mailto:${vendor.email}`} className="p-2 rounded-lg bg-[#D4AF37] hover:bg-[#B58E29] text-[#070506] font-bold transition-colors">
+                    <ExternalLink className="w-4 h-4" />
+                  </a>
+                ) : (
+                  <span className="text-[11px] text-[#A3AED0] font-semibold">No data</span>
+                )}
               </div>
 
               {/* Channel 4: Phone */}
@@ -623,14 +629,16 @@ export default function VendorProfileView({
                   <div>
                     <p className="text-sm font-bold text-[#2B3674]">Direct Contact</p>
                     <p className="text-xs text-[#A3AED0]">
-                      {vendor.phone || 'No phone registered'}
+                      {vendor.phone || 'No data'}
                     </p>
                   </div>
                 </div>
-                {vendor.phone && (
+                {vendor.phone ? (
                   <a href={`tel:${vendor.phone}`} className="p-2 rounded-lg bg-[#D4AF37] hover:bg-[#B58E29] text-[#070506] font-bold transition-colors">
                     <ExternalLink className="w-4 h-4" />
                   </a>
+                ) : (
+                  <span className="text-[11px] text-[#A3AED0] font-semibold">No data</span>
                 )}
               </div>
             </div>
@@ -641,7 +649,7 @@ export default function VendorProfileView({
         <div className="bg-white rounded-[20px] shadow-sm border border-[#E0E5F2] p-6">
           <h4 className="text-xl font-bold text-[#2B3674]">General Information</h4>
           <p className="text-xs text-[#707EAE] mt-1 leading-relaxed mb-6">
-            {vendor.notes || vendor.curatorNotes || 'No additional curator notes recorded for this vendor application.'}
+            {vendor.notes || vendor.curatorNotes || 'No data'}
           </p>
 
           {/* 2x3 Grid */}
@@ -649,28 +657,28 @@ export default function VendorProfileView({
             <div className="p-4 rounded-2xl bg-[#F4F7FE]">
               <p className="text-xs font-medium text-[#A3AED0]">Primary Contact</p>
               <p className="text-sm font-bold text-[#2B3674] mt-1">
-                {vendor.contactName || vendor.contactPerson || 'Not specified'}
+                {vendor.contactName || vendor.contactPerson || 'No data'}
               </p>
             </div>
 
             <div className="p-4 rounded-2xl bg-[#F4F7FE]">
               <p className="text-xs font-medium text-[#A3AED0]">Base Location</p>
               <p className="text-sm font-bold text-[#2B3674] mt-1">
-                {vendor.baseLocation || 'Not specified'}
+                {vendor.baseLocation || 'No data'}
               </p>
             </div>
 
             <div className="p-4 rounded-2xl bg-[#F4F7FE]">
               <p className="text-xs font-medium text-[#A3AED0]">Wedding Volume</p>
               <p className="text-sm font-bold text-[#2B3674] mt-1">
-                {vendor.weddingVolume && vendor.weddingVolume !== 'Not specified' ? vendor.weddingVolume : 'Not specified'}
+                {vendor.weddingVolume && vendor.weddingVolume !== 'Not specified' ? vendor.weddingVolume : 'No data'}
               </p>
             </div>
 
             <div className="p-4 rounded-2xl bg-[#F4F7FE]">
               <p className="text-xs font-medium text-[#A3AED0]">Typical Spend</p>
               <p className="text-sm font-bold text-[#2B3674] mt-1">
-                {vendor.typicalSpend && vendor.typicalSpend !== 'Not specified' ? vendor.typicalSpend : 'Not specified'}
+                {vendor.typicalSpend && vendor.typicalSpend !== 'Not specified' ? vendor.typicalSpend : 'No data'}
               </p>
             </div>
 
@@ -685,7 +693,7 @@ export default function VendorProfileView({
                   ))}
                 </div>
               ) : (
-                <p className="text-xs text-[#707EAE] italic">None specified</p>
+                <p className="text-xs text-[#A3AED0] font-semibold">No data</p>
               )}
             </div>
 
@@ -700,7 +708,7 @@ export default function VendorProfileView({
                   ))}
                 </div>
               ) : (
-                <p className="text-xs text-[#707EAE] italic">None specified</p>
+                <p className="text-xs text-[#A3AED0] font-semibold">No data</p>
               )}
             </div>
 

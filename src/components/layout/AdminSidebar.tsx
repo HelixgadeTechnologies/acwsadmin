@@ -141,11 +141,11 @@ export default function AdminSidebar({
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-3">
               <div className="w-9 h-9 rounded-full bg-[#D4AF37] text-[#070506] flex items-center justify-center font-bold text-sm shadow-xs">
-                {user?.name ? user.name.slice(0, 2).toUpperCase() : 'AD'}
+                {user?.name ? user.name.slice(0, 2).toUpperCase() : '--'}
               </div>
               <div className="overflow-hidden">
-                <p className="text-sm font-bold text-[#1B254B] truncate">{user?.name || 'Admin User'}</p>
-                <p className="text-xs text-[#A3AED0] truncate">{user?.email || 'admin@acws.co.uk'}</p>
+                <p className="text-sm font-bold text-[#1B254B] truncate">{user?.name || 'No data'}</p>
+                <p className="text-xs text-[#A3AED0] truncate">{user?.email || 'No data'}</p>
               </div>
             </div>
             <div title="Curator Verified">

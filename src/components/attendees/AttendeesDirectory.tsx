@@ -168,8 +168,8 @@ export default function AttendeesDirectory({
             <tbody className="divide-y divide-[#E0E5F2]">
               {filteredAttendees.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="text-center py-16 text-[#A3AED0] text-sm">
-                    No attendees found.
+                  <td colSpan={6} className="text-center py-16 text-[#A3AED0] text-sm font-semibold">
+                    No data
                   </td>
                 </tr>
               ) : (

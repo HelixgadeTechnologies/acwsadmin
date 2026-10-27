@@ -72,8 +72,8 @@ export default function RecentApplicationsTable({
           <tbody className="divide-y divide-[#E0E5F2]">
             {vendors.length === 0 ? (
               <tr>
-                <td colSpan={5} className="py-8 text-center text-xs text-[#A3AED0]">
-                  No recent vendor applications recorded.
+                <td colSpan={5} className="py-12 text-center text-sm font-semibold text-[#A3AED0]">
+                  No data
                 </td>
               </tr>
             ) : (

@@ -27,8 +27,8 @@ export default function CategoryDistribution({ vendors }: { vendors: Vendor[] })
 
       <div className="space-y-4">
         {categories.length === 0 ? (
-          <div className="py-8 text-center text-xs text-[#A3AED0]">
-            No vendor categories recorded yet.
+          <div className="py-12 text-center text-sm font-semibold text-[#A3AED0]">
+            No data
           </div>
         ) : (
           categories.map(([category, count]) => {

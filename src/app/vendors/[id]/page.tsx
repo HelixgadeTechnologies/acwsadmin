@@ -57,10 +57,11 @@ function VendorProfileContent({
         />
       ) : (
         <div className="py-20 text-center">
-          <p className="text-sm font-semibold text-[#EF4444]">Vendor application not found.</p>
+          <p className="text-base font-bold text-[#1B254B]">No data</p>
+          <p className="text-xs text-[#707EAE] mt-1">Vendor application not found or unavailable.</p>
           <Link
             href="/vendors"
-            className="inline-flex items-center gap-1.5 text-xs text-[#D4AF37] hover:underline mt-4"
+            className="inline-flex items-center gap-1.5 text-xs text-[#B58E29] font-bold hover:underline mt-4"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
             <span>Return to Vendors Directory</span>

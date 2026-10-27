@@ -97,7 +97,7 @@ export class ApiService {
       const aData = attendeesRes.status === 'fulfilled' ? attendeesRes.value.data : { attendees: [], total: 0 };
 
       const attendees = Array.isArray(aData.attendees) ? aData.attendees : [];
-      const totalAttendees = aData.total || attendees.length || 0;
+      const totalAttendees = aData.total ?? attendees.length;
       const checkedInCount = attendees.filter((a: any) => a.checkedIn).length;
       
       const calculatedRevenue = attendees.reduce((acc: number, a: any) => acc + (a.pricePaid || 0), 0) +
@@ -117,58 +117,23 @@ export class ApiService {
         totalRevenue: calculatedRevenue
       };
     } catch {
-      // Local fallback calculation from actual cached data
-      const vendors = this.getLocalVendors();
-      const attendees = this.getLocalAttendees();
-      const approved = vendors.filter(v => v.status === 'approved').length;
-      const pending = vendors.filter(v => v.status === 'pending').length;
-      const waitlisted = vendors.filter(v => v.status === 'waitlisted').length;
-      const rejected = vendors.filter(v => v.status === 'rejected').length;
-      const checkedInCount = attendees.filter(a => a.checkedIn).length;
-      const revenue = attendees.reduce((acc, a) => acc + (a.pricePaid || 0), 0) + (approved * 1250);
-
       return {
-        totalVendors: vendors.length,
-        approvedCount: approved,
-        pendingCount: pending,
-        waitlistedCount: waitlisted,
-        rejectedCount: rejected,
-        catwalkCount: vendors.filter(v => v.paymentTier === 'catwalk').length,
-        premiumCount: vendors.filter(v => v.paymentTier === 'premium').length,
-        standardCount: vendors.filter(v => v.paymentTier === 'standard').length,
-        totalAttendees: attendees.length,
-        attendeesCheckedIn: checkedInCount,
-        totalRevenue: revenue
+        totalVendors: 0,
+        approvedCount: 0,
+        pendingCount: 0,
+        waitlistedCount: 0,
+        rejectedCount: 0,
+        catwalkCount: 0,
+        premiumCount: 0,
+        standardCount: 0,
+        totalAttendees: 0,
+        attendeesCheckedIn: 0,
+        totalRevenue: 0
       };
     }
   }
 
   // Vendors
-  static getLocalVendors(): Vendor[] {
-    if (typeof window === 'undefined') return [];
-    const stored = localStorage.getItem('acws_cached_vendors');
-    if (stored) {
-      try {
-        const parsed = JSON.parse(stored);
-        if (Array.isArray(parsed)) {
-          // Filter out any legacy dummy vendor IDs from previous mocks
-          const realVendors = parsed
-            .filter((v: any) => v._id !== 'vnd-001' && v._id !== 'vnd-002')
-            .map(normalizeVendor);
-          return realVendors;
-        }
-      } catch {
-        return [];
-      }
-    }
-    return [];
-  }
-
-  static saveLocalVendors(vendors: Vendor[]): void {
-    if (typeof window === 'undefined') return;
-    localStorage.setItem('acws_cached_vendors', JSON.stringify(vendors));
-  }
-
   static async getVendors(params: {
     page?: number;
     limit?: number;
@@ -189,103 +154,36 @@ export class ApiService {
       );
       if (res.data?.vendors) {
         const normalized = res.data.vendors.map(normalizeVendor);
-        this.saveLocalVendors(normalized);
         return {
           vendors: normalized,
-          total: res.data.total,
+          total: res.data.total ?? normalized.length,
           totalPages: res.data.totalPages || 1
         };
       }
       return { vendors: [], total: 0, totalPages: 1 };
     } catch {
-      let filtered = this.getLocalVendors();
-      if (params.status && params.status !== 'all') {
-        filtered = filtered.filter(v => v.status === params.status);
-      }
-      if (params.category && params.category !== 'all') {
-        filtered = filtered.filter(v => v.category === params.category);
-      }
-      if (params.search) {
-        const q = params.search.toLowerCase();
-        filtered = filtered.filter(
-          v =>
-            v.businessName.toLowerCase().includes(q) ||
-            v.refCode.toLowerCase().includes(q) ||
-            v.email.toLowerCase().includes(q) ||
-            (v.contactName && v.contactName.toLowerCase().includes(q))
-        );
-      }
-      return {
-        vendors: filtered,
-        total: filtered.length,
-        totalPages: 1
-      };
+      return { vendors: [], total: 0, totalPages: 1 };
     }
   }
 
   static async getVendorById(id: string): Promise<Vendor | null> {
     try {
       const res = await this.request<{ data: any }>(`/admin/vendors/${id}`);
-      return normalizeVendor(res.data);
+      return res.data ? normalizeVendor(res.data) : null;
     } catch {
-      const list = this.getLocalVendors();
-      return list.find(v => v._id === id || v.refCode === id) || null;
+      return null;
     }
   }
 
   static async updateVendorStatus(id: string, status: VendorStatus, notes?: string): Promise<Vendor> {
-    try {
-      const res = await this.request<{ data: any }>(`/admin/vendors/${id}/status`, {
-        method: 'PATCH',
-        body: JSON.stringify({ status, notes })
-      });
-      const updated = normalizeVendor(res.data);
-      // Synchronize in local cache
-      const list = this.getLocalVendors();
-      const idx = list.findIndex(v => v._id === id || v.refCode === id);
-      if (idx !== -1) {
-        list[idx] = updated;
-        this.saveLocalVendors(list);
-      }
-      return updated;
-    } catch {
-      const list = this.getLocalVendors();
-      const idx = list.findIndex(v => v._id === id || v.refCode === id);
-      if (idx !== -1) {
-        list[idx] = { ...list[idx], status, notes: notes || list[idx].notes };
-        this.saveLocalVendors(list);
-        return list[idx];
-      }
-      throw new Error('Vendor not found.');
-    }
+    const res = await this.request<{ data: any }>(`/admin/vendors/${id}/status`, {
+      method: 'PATCH',
+      body: JSON.stringify({ status, notes })
+    });
+    return normalizeVendor(res.data);
   }
 
   // Attendees
-  static getLocalAttendees(): Attendee[] {
-    if (typeof window === 'undefined') return [];
-    const stored = localStorage.getItem('acws_cached_attendees');
-    if (stored) {
-      try {
-        const parsed = JSON.parse(stored);
-        if (Array.isArray(parsed)) {
-          // Filter out any legacy dummy attendee IDs from previous mocks
-          const realAttendees = parsed
-            .filter((a: any) => a._id !== 'att-001' && !a._id?.startsWith('att-import-'))
-            .map(normalizeAttendee);
-          return realAttendees;
-        }
-      } catch {
-        return [];
-      }
-    }
-    return [];
-  }
-
-  static saveLocalAttendees(attendees: Attendee[]): void {
-    if (typeof window === 'undefined') return;
-    localStorage.setItem('acws_cached_attendees', JSON.stringify(attendees));
-  }
-
   static async getAttendees(params: {
     page?: number;
     limit?: number;
@@ -305,40 +203,19 @@ export class ApiService {
         `/admin/attendees?${query.toString()}`
       );
       if (res.data?.attendees) {
-        const normalized = res.data.attendees.map(normalizeAttendee);
-        this.saveLocalAttendees(normalized);
-        return normalized;
+        return res.data.attendees.map(normalizeAttendee);
       }
-      return this.getLocalAttendees();
+      return [];
     } catch {
-      return this.getLocalAttendees();
+      return [];
     }
   }
 
   static async toggleAttendeeCheckin(id: string): Promise<Attendee> {
-    try {
-      const res = await this.request<{ data: any }>(`/admin/attendees/${id}/checkin`, {
-        method: 'PATCH'
-      });
-      const updated = normalizeAttendee(res.data);
-      const list = this.getLocalAttendees();
-      const idx = list.findIndex(a => a._id === id || a.refCode === id);
-      if (idx !== -1) {
-        list[idx] = updated;
-        this.saveLocalAttendees(list);
-      }
-      return updated;
-    } catch {
-      const attendees = this.getLocalAttendees();
-      const idx = attendees.findIndex(a => a._id === id || a.refCode === id);
-      if (idx !== -1) {
-        attendees[idx].checkedIn = !attendees[idx].checkedIn;
-        attendees[idx].checkedInAt = attendees[idx].checkedIn ? new Date().toISOString() : undefined;
-        this.saveLocalAttendees(attendees);
-        return attendees[idx];
-      }
-      throw new Error('Attendee not found');
-    }
+    const res = await this.request<{ data: any }>(`/admin/attendees/${id}/checkin`, {
+      method: 'PATCH'
+    });
+    return normalizeAttendee(res.data);
   }
 
   static async importAttendees(newAttendees: Omit<Attendee, '_id' | 'refCode' | 'checkedIn' | 'registeredAt'>[]): Promise<number> {
@@ -346,7 +223,6 @@ export class ApiService {
       method: 'POST',
       body: JSON.stringify({ attendees: newAttendees })
     });
-    await this.getAttendees();
     return res.data?.count || newAttendees.length;
   }
 }
