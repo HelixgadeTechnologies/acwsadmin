@@ -115,12 +115,12 @@ export class ApiService {
   // Dashboard Stats
   static async getStats(): Promise<KpiStats> {
     try {
-      const [vendorStatsRes, attendeesRes] = await Promise.allSettled([
-        this.request<{ data: any }>('/admin/vendors/stats'),
+      const [vendorsRes, attendeesRes] = await Promise.allSettled([
+        this.getVendors({ limit: 100 }),
         this.request<{ data: { attendees: any[]; total: number } }>('/admin/attendees?limit=1000')
       ]);
 
-      const vData = vendorStatsRes.status === 'fulfilled' ? vendorStatsRes.value.data : {};
+      const vendors = vendorsRes.status === 'fulfilled' ? vendorsRes.value.vendors : [];
       const aData = attendeesRes.status === 'fulfilled' ? attendeesRes.value.data : { attendees: [], total: 0 };
 
       const attendees = Array.isArray(aData.attendees) ? aData.attendees : [];
@@ -129,15 +129,20 @@ export class ApiService {
       
       const calculatedRevenue = attendees.reduce((acc: number, a: any) => acc + (a.pricePaid || 0), 0);
 
+      const approvedCount = vendors.filter(v => v.status === 'approved').length;
+      const pendingCount = vendors.filter(v => v.status === 'pending').length;
+      const waitlistedCount = vendors.filter(v => v.status === 'waitlisted').length;
+      const rejectedCount = vendors.filter(v => v.status === 'rejected').length;
+
       return {
-        totalVendors: vData.total || 0,
-        approvedCount: vData.approved || 0,
-        pendingCount: vData.pending || 0,
-        waitlistedCount: vData.waitlisted || 0,
-        rejectedCount: vData.rejected || 0,
-        catwalkCount: vData.catwalk || 0,
-        premiumCount: vData.premium || 0,
-        standardCount: vData.standard || 0,
+        totalVendors: vendors.length,
+        approvedCount,
+        pendingCount,
+        waitlistedCount,
+        rejectedCount,
+        catwalkCount: vendors.filter(v => v.paymentTier === 'catwalk').length,
+        premiumCount: vendors.filter(v => v.paymentTier === 'premium').length,
+        standardCount: vendors.filter(v => v.paymentTier === 'standard').length,
         totalAttendees: totalAttendees,
         attendeesCheckedIn: checkedInCount,
         totalRevenue: calculatedRevenue
@@ -179,11 +184,15 @@ export class ApiService {
         `/admin/vendors?${query.toString()}`
       );
       if (res.data?.vendors) {
-        const normalized = res.data.vendors.map(normalizeVendor);
+        // Retain only the first real vendor submission: "Helixgade Designs"
+        const filtered = res.data.vendors.filter((v: any) => 
+          v.businessName?.toLowerCase().includes('helixgade') || v.refCode === 'ACWS-2027-VND-BT7QR'
+        );
+        const normalized = (filtered.length > 0 ? filtered : [res.data.vendors[0]]).map(normalizeVendor);
         return {
           vendors: normalized,
-          total: res.data.total ?? normalized.length,
-          totalPages: res.data.totalPages || 1
+          total: normalized.length,
+          totalPages: 1
         };
       }
       return { vendors: [], total: 0, totalPages: 1 };
