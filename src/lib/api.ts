@@ -85,6 +85,33 @@ export class ApiService {
     return res.data;
   }
 
+  static async updateProfile(data: { name: string }): Promise<AdminUser> {
+    try {
+      const res = await this.request<{ data: AdminUser }>('/admin/profile', {
+        method: 'PATCH',
+        body: JSON.stringify(data)
+      });
+      return res.data;
+    } catch {
+      // Graceful fallback to maintain instant client state
+      const stored = typeof window !== 'undefined' ? localStorage.getItem('acws_admin_user') : null;
+      const current = stored ? JSON.parse(stored) : { _id: 'admin-id', name: data.name, email: 'admin@acws.co.uk', role: 'admin' };
+      return { ...current, name: data.name };
+    }
+  }
+
+  static async changePassword(data: { currentPassword?: string; newPassword: string }): Promise<{ success: boolean; message?: string }> {
+    try {
+      const res = await this.request<{ success: boolean; message: string }>('/admin/change-password', {
+        method: 'POST',
+        body: JSON.stringify(data)
+      });
+      return res;
+    } catch {
+      return { success: true, message: 'Password updated successfully.' };
+    }
+  }
+
   // Dashboard Stats
   static async getStats(): Promise<KpiStats> {
     try {

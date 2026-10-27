@@ -11,6 +11,7 @@ interface AuthContextType {
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
+  updateUser: (updatedUser: Partial<AdminUser>) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -70,6 +71,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const updateUser = (updatedUser: Partial<AdminUser>) => {
+    setUser(prev => {
+      if (!prev) return null;
+      const nextUser = { ...prev, ...updatedUser };
+      try {
+        localStorage.setItem('acws_admin_user', JSON.stringify(nextUser));
+      } catch (e) {
+        console.error('Failed to store updated user:', e);
+      }
+      return nextUser;
+    });
+  };
+
   const logout = () => {
     setUser(null);
     setToken(null);
@@ -91,7 +105,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         isAuthenticated: !!token,
         isLoading,
         login,
-        logout
+        logout,
+        updateUser
       }}
     >
       {children}
