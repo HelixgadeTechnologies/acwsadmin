@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { KpiStats } from '@/types';
-import { Store, CheckCircle2, Clock, Users, ArrowUpRight } from 'lucide-react';
+import { Store, CheckCircle2, PoundSterling, Users, ArrowUpRight } from 'lucide-react';
 import Link from 'next/link';
 
 export default function StatCards({ stats }: { stats: KpiStats }) {
@@ -28,14 +28,16 @@ export default function StatCards({ stats }: { stats: KpiStats }) {
       link: '/vendors?status=approved'
     },
     {
-      title: 'Pending Review',
-      value: stats.pendingCount,
-      subtext: 'Action required by curator',
-      icon: Clock,
-      color: 'text-[#F59E0B]',
-      bgColor: 'bg-[#F59E0B]/10',
-      borderColor: 'border-[#F59E0B]/30',
-      link: '/vendors?status=pending'
+      title: 'Total Amount Paid',
+      value: `£${(stats.totalRevenue || 0).toLocaleString()}`,
+      subtext: (stats.vendorRevenue !== undefined && stats.attendeeRevenue !== undefined)
+        ? `Vendors: £${stats.vendorRevenue.toLocaleString()} • Guests: £${stats.attendeeRevenue.toLocaleString()}`
+        : 'Combined vendors & attendees',
+      icon: PoundSterling,
+      color: 'text-[#10B981]',
+      bgColor: 'bg-[#10B981]/10',
+      borderColor: 'border-[#10B981]/30',
+      link: '/vendors'
     },
     {
       title: 'Total Attendees',

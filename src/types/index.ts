@@ -77,6 +77,8 @@ export interface KpiStats {
   totalAttendees: number;
   attendeesCheckedIn: number;
   totalRevenue: number;
+  vendorRevenue?: number;
+  attendeeRevenue?: number;
 }
 
 export interface AdminUser {

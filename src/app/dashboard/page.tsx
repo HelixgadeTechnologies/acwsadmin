@@ -20,7 +20,9 @@ export default function DashboardPage() {
     standardCount: 0,
     totalAttendees: 0,
     attendeesCheckedIn: 0,
-    totalRevenue: 0
+    totalRevenue: 0,
+    vendorRevenue: 0,
+    attendeeRevenue: 0
   });
   const [vendors, setVendors] = useState<Vendor[]>([]);
 

@@ -32,7 +32,7 @@ function normalizeAdminUser(data: any): AdminUser {
     return { _id: '', name: '', email: '', role: 'admin' };
   }
   const u = data.user || data;
-  const role: 'admin' | 'superadmin' | 'curator' = 
+  const role: 'admin' | 'superadmin' | 'curator' =
     u.role === 'superadmin' || u.role === 'curator' ? u.role : 'admin';
   return {
     _id: u._id || u.id || '',
@@ -146,7 +146,7 @@ export class ApiService {
       const attendees = Array.isArray(aData.attendees) ? aData.attendees : [];
       const totalAttendees = aData.total ?? attendees.length;
       const checkedInCount = attendees.filter((a: any) => a.checkedIn).length;
-      
+
       const attendeeRevenue = attendees.reduce((acc: number, a: any) => {
         if (a.pricePaid !== undefined && a.pricePaid !== null && a.pricePaid !== '') {
           const p = typeof a.pricePaid === 'number' ? a.pricePaid : parseFloat(String(a.pricePaid).replace(/[^0-9.-]/g, ''));
@@ -194,7 +194,9 @@ export class ApiService {
         standardCount: vendors.filter(v => v.paymentTier === 'standard').length,
         totalAttendees: totalAttendees,
         attendeesCheckedIn: checkedInCount,
-        totalRevenue: calculatedRevenue
+        totalRevenue: calculatedRevenue,
+        vendorRevenue,
+        attendeeRevenue
       };
     } catch {
       return {
@@ -208,7 +210,9 @@ export class ApiService {
         standardCount: 0,
         totalAttendees: 0,
         attendeesCheckedIn: 0,
-        totalRevenue: 0
+        totalRevenue: 0,
+        vendorRevenue: 0,
+        attendeeRevenue: 0
       };
     }
   }
@@ -309,8 +313,8 @@ export class ApiService {
     if (cleanId.includes('ATT') || cleanId.startsWith('ACWS')) {
       try {
         const searched = await this.getAttendees({ search: cleanId, limit: 10 });
-        const match = searched.find(a => 
-          a.refCode.toLowerCase() === cleanId.toLowerCase() || 
+        const match = searched.find(a =>
+          a.refCode.toLowerCase() === cleanId.toLowerCase() ||
           a._id === cleanId
         );
         if (match) return match;
@@ -322,8 +326,8 @@ export class ApiService {
     // 3. Fallback: fetch current attendee list (cap at 100) and find by _id or refCode
     try {
       const attendees = await this.getAttendees({ limit: 100 });
-      return attendees.find(a => 
-        a._id === cleanId || 
+      return attendees.find(a =>
+        a._id === cleanId ||
         a.refCode.toLowerCase() === cleanId.toLowerCase() ||
         (a._id && a._id.toLowerCase() === cleanId.toLowerCase())
       ) || null;
