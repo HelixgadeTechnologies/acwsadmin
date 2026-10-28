@@ -27,6 +27,22 @@ function normalizeAttendee(a: any): Attendee {
   };
 }
 
+function normalizeAdminUser(data: any): AdminUser {
+  if (!data) {
+    return { _id: '', name: '', email: '', role: 'admin' };
+  }
+  const u = data.user || data;
+  const role: 'admin' | 'superadmin' | 'curator' = 
+    u.role === 'superadmin' || u.role === 'curator' ? u.role : 'admin';
+  return {
+    _id: u._id || u.id || '',
+    name: u.name || u.fullName || '',
+    email: u.email || '',
+    role,
+    token: u.token || data.token
+  };
+}
+
 // Offline fallback mock data removed - portal runs strictly on live backend data
 
 
@@ -75,28 +91,31 @@ export class ApiService {
         method: 'POST',
         body: JSON.stringify({ email, password })
       });
-      return res.data;
+      return {
+        user: normalizeAdminUser(res.data?.user || res.data),
+        token: res.data?.token
+      };
     } catch (err: any) {
       throw new Error(err.message || 'Invalid email or password.');
     }
   }
 
   static async getMe(): Promise<AdminUser> {
-    const res = await this.request<{ data: AdminUser }>('/admin/me');
-    return res.data;
+    const res = await this.request<{ data: any }>('/admin/me');
+    return normalizeAdminUser(res.data);
   }
 
   static async updateProfile(data: { name: string }): Promise<AdminUser> {
     try {
-      const res = await this.request<{ data: AdminUser }>('/admin/profile', {
+      const res = await this.request<{ data: any }>('/admin/profile', {
         method: 'PATCH',
         body: JSON.stringify(data)
       });
-      return res.data;
+      return normalizeAdminUser(res.data);
     } catch {
       // Graceful fallback to maintain instant client state
       const stored = typeof window !== 'undefined' ? localStorage.getItem('acws_admin_user') : null;
-      const current = stored ? JSON.parse(stored) : { _id: '', name: data.name, email: '', role: 'admin' };
+      const current: AdminUser = stored ? normalizeAdminUser(JSON.parse(stored)) : { _id: '', name: data.name, email: '', role: 'admin' };
       return { ...current, name: data.name };
     }
   }
@@ -185,15 +204,11 @@ export class ApiService {
         `/admin/vendors?${query.toString()}`
       );
       if (res.data?.vendors) {
-        // Retain only the first real vendor submission: "Helixgade Designs"
-        const filtered = res.data.vendors.filter((v: any) => 
-          v.businessName?.toLowerCase().includes('helixgade') || v.refCode === 'ACWS-2027-VND-BT7QR'
-        );
-        const normalized = (filtered.length > 0 ? filtered : [res.data.vendors[0]]).map(normalizeVendor);
+        const normalized = res.data.vendors.map(normalizeVendor);
         return {
           vendors: normalized,
-          total: normalized.length,
-          totalPages: 1
+          total: res.data.total ?? normalized.length,
+          totalPages: res.data.totalPages ?? 1
         };
       }
       return { vendors: [], total: 0, totalPages: 1 };

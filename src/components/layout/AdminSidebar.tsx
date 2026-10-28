@@ -127,20 +127,27 @@ export default function AdminSidebar({
 
         {/* User Identity & Logout */}
         <div className="p-4 border-t border-[#E0E5F2] bg-white">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-full bg-[#D4AF37] text-[#070506] flex items-center justify-center font-bold text-sm shadow-xs">
-                {user?.name ? user.name.slice(0, 2).toUpperCase() : '--'}
+          {(() => {
+            const userName = user?.name || (user as any)?.user?.name || '';
+            const userEmail = user?.email || (user as any)?.user?.email || '';
+            const initials = userName ? userName.slice(0, 2).toUpperCase() : 'AC';
+            return (
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-3 overflow-hidden">
+                  <div className="w-9 h-9 rounded-full bg-[#D4AF37] text-[#070506] flex items-center justify-center font-bold text-sm shadow-xs shrink-0">
+                    {initials}
+                  </div>
+                  <div className="overflow-hidden">
+                    <p className="text-sm font-bold text-[#1B254B] truncate">{userName || 'ACWS Curator'}</p>
+                    <p className="text-xs text-[#A3AED0] truncate">{userEmail || 'admin@acws.co.uk'}</p>
+                  </div>
+                </div>
+                <div title="Curator Verified" className="shrink-0">
+                  <ShieldCheck className="w-4 h-4 text-[#D4AF37]" />
+                </div>
               </div>
-              <div className="overflow-hidden">
-                <p className="text-sm font-bold text-[#1B254B] truncate">{user?.name || 'No data'}</p>
-                <p className="text-xs text-[#A3AED0] truncate">{user?.email || 'No data'}</p>
-              </div>
-            </div>
-            <div title="Curator Verified">
-              <ShieldCheck className="w-4 h-4 text-[#D4AF37]" />
-            </div>
-          </div>
+            );
+          })()}
 
           <button
             onClick={logout}

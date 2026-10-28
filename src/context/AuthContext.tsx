@@ -31,7 +31,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setToken(storedToken);
           if (storedUser) {
             try {
-              setUser(JSON.parse(storedUser));
+              const parsed = JSON.parse(storedUser);
+              const unnested = parsed?.user || parsed;
+              if (unnested) {
+                setUser({
+                  _id: unnested._id || unnested.id || '',
+                  name: unnested.name || unnested.fullName || '',
+                  email: unnested.email || '',
+                  role: unnested.role || 'admin',
+                  token: unnested.token
+                });
+              }
             } catch {
               // Ignore parse error
             }
@@ -40,8 +50,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           // Hydrate & verify live session with backend
           try {
             const liveUser = await ApiService.getMe();
-            setUser(liveUser);
-            localStorage.setItem('acws_admin_user', JSON.stringify(liveUser));
+            if (liveUser && (liveUser.name || liveUser.email)) {
+              setUser(liveUser);
+              localStorage.setItem('acws_admin_user', JSON.stringify(liveUser));
+            }
           } catch (err: any) {
             if (err?.message === 'Unauthorized') {
               logout();

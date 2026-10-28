@@ -104,9 +104,18 @@ export default function AdminHeader({
 
           {/* Admin Profile Pill */}
           <div className="flex items-center gap-2 pl-2 border-l border-[#E0E5F2]">
-            <div className="w-8 h-8 rounded-full bg-[#D4AF37] text-[#070506] font-bold text-xs flex items-center justify-center shadow-xs">
-              {user?.name ? user.name.slice(0, 2).toUpperCase() : '--'}
-            </div>
+            {(() => {
+              const userName = user?.name || (user as any)?.user?.name || '';
+              const initials = userName ? userName.slice(0, 2).toUpperCase() : 'AC';
+              return (
+                <div 
+                  title={userName || 'ACWS Curator'} 
+                  className="w-8 h-8 rounded-full bg-[#D4AF37] text-[#070506] font-bold text-xs flex items-center justify-center shadow-xs"
+                >
+                  {initials}
+                </div>
+              );
+            })()}
           </div>
         </div>
       </div>

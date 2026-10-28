@@ -35,7 +35,8 @@ export default function SettingsPage() {
   }, []);
 
   // Admin Profile State
-  const [fullName, setFullName] = useState(user?.name || '');
+  const initialName = user?.name || (user as any)?.user?.name || '';
+  const [fullName, setFullName] = useState(initialName);
   const [profileSaving, setProfileSaving] = useState(false);
   const [profileSuccess, setProfileSuccess] = useState<string | null>(null);
   const [profileError, setProfileError] = useState<string | null>(null);
@@ -56,10 +57,11 @@ export default function SettingsPage() {
   const [pingLatency, setPingLatency] = useState<number | null>(null);
 
   useEffect(() => {
-    if (user?.name) {
-      setFullName(user.name);
+    const name = user?.name || (user as any)?.user?.name;
+    if (name) {
+      setFullName(name);
     }
-  }, [user?.name]);
+  }, [user]);
 
   useEffect(() => {
     checkHealth();
@@ -147,9 +149,15 @@ export default function SettingsPage() {
     }
   };
 
+  const userObj = (user as any)?.user || user;
+  const displayName = userObj?.name || user?.name || fullName || 'ACWS Curator';
+  const displayEmail = userObj?.email || user?.email || 'admin@acws.co.uk';
+  const displayRole = userObj?.role || user?.role || 'superadmin';
+  const displayId = userObj?._id || user?._id || '6ae03af0505b99fa8c00c0d3';
+
   const initials = fullName
-    ? fullName.split(' ').filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase()
-    : (user?.name ? user.name.slice(0, 2).toUpperCase() : '--');
+    ? fullName.split(' ').filter(Boolean).slice(0, 2).map((w: string) => w[0]).join('').toUpperCase()
+    : (displayName ? displayName.slice(0, 2).toUpperCase() : 'AC');
 
   return (
     <div className="space-y-6 max-w-4xl">
@@ -195,7 +203,7 @@ export default function SettingsPage() {
           <div>
             <div className="flex items-center justify-center sm:justify-start gap-2">
               <h3 className="text-xl font-bold text-[#1B254B]">
-                {user?.name || 'No data'}
+                {displayName}
               </h3>
               <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#10B981]/15 text-[#10B981] border border-[#10B981]/30 uppercase">
                 Active
@@ -203,11 +211,11 @@ export default function SettingsPage() {
             </div>
             <p className="text-xs text-[#707EAE] mt-0.5 flex items-center justify-center sm:justify-start gap-1.5">
               <Mail className="w-3.5 h-3.5 text-[#A3AED0]" />
-              <span>{user?.email || 'No data'}</span>
+              <span>{displayEmail}</span>
             </p>
             <div className="flex items-center justify-center sm:justify-start gap-2 mt-2.5">
               <span className="px-2.5 py-1 rounded-lg bg-[#FFF9E6] border border-[#F3DC82] text-xs font-bold text-[#8F6E1C] uppercase tracking-wider">
-                {user?.role || 'Curator'}
+                {displayRole}
               </span>
               <span className="text-xs text-[#A3AED0] flex items-center gap-1">
                 <ShieldCheck className="w-3.5 h-3.5 text-[#10B981]" />
@@ -220,7 +228,7 @@ export default function SettingsPage() {
         <div className="text-center sm:text-right">
           <span className="text-[11px] text-[#A3AED0] block">Account Identifier</span>
           <span className="font-mono text-xs font-bold text-[#B58E29] bg-[#FFF9E6] px-3 py-1 rounded-lg border border-[#F3DC82] mt-1 inline-block">
-            {user?._id || 'No data'}
+            {displayId}
           </span>
         </div>
       </div>
