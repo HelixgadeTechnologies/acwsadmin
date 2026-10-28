@@ -27,6 +27,9 @@ export interface Vendor {
   curatorNotes?: string;
   qrCode?: string;
   publicProfileUrl?: string;
+  pricePaid?: number;
+  amountPaid?: number;
+  paymentStatus?: 'paid' | 'pending' | 'unpaid' | string;
   createdAt: string;
   updatedAt?: string;
 }

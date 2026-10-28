@@ -147,7 +147,36 @@ export class ApiService {
       const totalAttendees = aData.total ?? attendees.length;
       const checkedInCount = attendees.filter((a: any) => a.checkedIn).length;
       
-      const calculatedRevenue = attendees.reduce((acc: number, a: any) => acc + (a.pricePaid || 0), 0);
+      const attendeeRevenue = attendees.reduce((acc: number, a: any) => {
+        if (a.pricePaid !== undefined && a.pricePaid !== null && a.pricePaid !== '') {
+          const p = typeof a.pricePaid === 'number' ? a.pricePaid : parseFloat(String(a.pricePaid).replace(/[^0-9.-]/g, ''));
+          if (!isNaN(p) && p > 0) return acc + p;
+        }
+        const status = (a.paymentStatus || 'paid').toLowerCase();
+        if (status !== 'complimentary' && status !== 'pending' && status !== 'free' && status !== 'unpaid') {
+          const type = (a.ticketType || 'standard').toLowerCase();
+          if (type.includes('catwalk')) return acc + 85;
+          if (type.includes('vip')) return acc + 65;
+          return acc + 25;
+        }
+        return acc;
+      }, 0);
+
+      const vendorRevenue = vendors.reduce((acc: number, v: any) => {
+        const explicit = v.pricePaid ?? v.amountPaid ?? v.amount ?? v.fee;
+        if (explicit !== undefined && explicit !== null && explicit !== '') {
+          const p = typeof explicit === 'number' ? explicit : parseFloat(String(explicit).replace(/[^0-9.-]/g, ''));
+          if (!isNaN(p) && p > 0) return acc + p;
+        }
+        if (v.status === 'approved' || v.paymentStatus === 'paid') {
+          const tier = (v.paymentTier || 'standard').toLowerCase();
+          const tierMap: Record<string, number> = { standard: 1250, premium: 1850, catwalk: 2500, executive: 3500 };
+          return acc + (tierMap[tier] || 1250);
+        }
+        return acc;
+      }, 0);
+
+      const calculatedRevenue = attendeeRevenue + vendorRevenue;
 
       const approvedCount = vendors.filter(v => v.status === 'approved').length;
       const pendingCount = vendors.filter(v => v.status === 'pending').length;

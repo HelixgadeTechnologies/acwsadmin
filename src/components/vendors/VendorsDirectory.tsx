@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
 import { Vendor, VendorStatus } from '@/types';
+import VendorStatCards from './VendorStatCards';
 import { 
   Search, 
   Download, 
@@ -46,6 +47,16 @@ export default function VendorsDirectory({
   React.useEffect(() => {
     setVendors(initialVendors);
   }, [initialVendors]);
+
+  React.useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const statusParam = params.get('status');
+      if (statusParam && ['all', 'pending', 'approved', 'waitlisted', 'rejected'].includes(statusParam)) {
+        setStatusFilter(statusParam);
+      }
+    }
+  }, []);
 
   const categories = useMemo(() => {
     const set = new Set<string>();
@@ -138,6 +149,16 @@ export default function VendorsDirectory({
 
   return (
     <div className="space-y-6 w-full">
+      {/* KPI Stat Cards (including Amount Made by Vendor Payments) */}
+      <VendorStatCards
+        vendors={vendors}
+        activeFilter={statusFilter}
+        onFilterSelect={(targetStatus) => {
+          setStatusFilter(targetStatus);
+          setCurrentPage(1);
+        }}
+      />
+
       {/* Top Filter Bar */}
       <div className="bg-white border border-[#E0E5F2] rounded-2xl p-5 space-y-4 shadow-xs">
         {/* Status Filter Tabs & Gold Export Button */}

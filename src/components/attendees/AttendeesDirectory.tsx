@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { Attendee } from '@/types';
+import AttendeeStatCards from './AttendeeStatCards';
 import { 
   Search, 
   Upload, 
@@ -88,6 +89,13 @@ export default function AttendeesDirectory({
 
   return (
     <div className="space-y-6 w-full">
+      {/* KPI Stat Cards (including Amount Made by Attendee Payments) */}
+      <AttendeeStatCards
+        attendees={attendees}
+        activeFilter={statusFilter}
+        onFilterSelect={(targetStatus) => setStatusFilter(targetStatus)}
+      />
+
       {/* Top Action Bar */}
       <div className="bg-white border border-[#E0E5F2] rounded-2xl p-5 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 shadow-xs">
         {/* Search */}
