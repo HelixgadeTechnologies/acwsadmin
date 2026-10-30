@@ -4,11 +4,11 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { Attendee } from '@/types';
 import AttendeeStatCards from './AttendeeStatCards';
-import { 
-  Search, 
-  Upload, 
-  Download, 
-  CheckCircle2, 
+import {
+  Search,
+  Upload,
+  Download,
+  CheckCircle2,
   Clock,
   Eye
 } from 'lucide-react';
@@ -56,7 +56,17 @@ export default function AttendeesDirectory({
   };
 
   const exportCsv = () => {
-    const headers = ['Ref Code', 'Full Name', 'Partner Name', 'Email', 'Phone', 'Ticket Type', 'Registration Date & Time', 'Checked In'];
+    const headers = [
+      'Ref Code',
+      'Full Name',
+      'Partner Name',
+      'Email',
+      'Phone',
+      'Ticket Type',
+      'Registration Date',
+      'Registration Time',
+      'Checked In'
+    ];
     const rows = filteredAttendees.map(a => [
       `"${a.refCode}"`,
       `"${a.fullName}"`,
@@ -64,7 +74,8 @@ export default function AttendeesDirectory({
       `"${a.email}"`,
       `"${a.phone || ''}"`,
       `"${a.ticketType}"`,
-      `"${a.registeredAt || a.createdAt ? new Date(a.registeredAt || a.createdAt!).toLocaleString('en-GB') : ''}"`,
+      `"${a.registeredAt || a.createdAt ? new Date(a.registeredAt || a.createdAt!).toLocaleDateString('en-GB') : ''}"`,
+      `"${a.registeredAt || a.createdAt ? new Date(a.registeredAt || a.createdAt!).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) : ''}"`,
       `"${a.checkedIn ? 'Yes' : 'No'}"`
     ]);
 
@@ -84,7 +95,7 @@ export default function AttendeesDirectory({
       try {
         if (att._id) sessionStorage.setItem(`acws_attendee_${att._id}`, JSON.stringify(att));
         if (att.refCode) sessionStorage.setItem(`acws_attendee_${att.refCode}`, JSON.stringify(att));
-      } catch {}
+      } catch { }
     }
   };
 
@@ -157,11 +168,10 @@ export default function AttendeesDirectory({
 
         <button
           onClick={() => setStatusFilter(statusFilter === 'checkedIn' ? 'all' : 'checkedIn')}
-          className={`px-3 py-2 rounded-xl border transition-all cursor-pointer font-bold ${
-            statusFilter === 'checkedIn'
+          className={`px-3 py-2 rounded-xl border transition-all cursor-pointer font-bold ${statusFilter === 'checkedIn'
               ? 'bg-[#10B981]/15 text-[#10B981] border-[#10B981]/40'
               : 'bg-white text-[#707EAE] border-[#E0E5F2]'
-          }`}
+            }`}
         >
           Checked In Only
         </button>
@@ -181,7 +191,8 @@ export default function AttendeesDirectory({
                 <th className="py-4.5 px-4">Guest & Partner</th>
                 <th className="py-4.5 px-4">Contact Details</th>
                 <th className="py-4.5 px-4">Ticket Type</th>
-                <th className="py-4.5 px-4">Registered At</th>
+                <th className="py-4.5 px-4">Date</th>
+                <th className="py-4.5 px-4">Time</th>
                 <th className="py-4.5 px-4">Venue Check-In</th>
                 <th className="py-4.5 pr-6 text-right">Action</th>
               </tr>
@@ -189,17 +200,21 @@ export default function AttendeesDirectory({
             <tbody className="divide-y divide-[#E0E5F2]">
               {filteredAttendees.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="text-center py-16 text-[#A3AED0] text-sm font-semibold">
-                    No data
-                  </td>
+                    <td colSpan={8} className="text-center py-16 text-[#A3AED0] text-sm font-semibold">
+                      No data
+                    </td>
                 </tr>
               ) : (
                 filteredAttendees.map((att) => {
                   const attendeeRouteId = att._id || att.refCode;
+                  const rawDate = att.registeredAt || att.createdAt;
+                  const dateObj = rawDate ? new Date(rawDate) : null;
+                  const isValidDate = Boolean(dateObj && !isNaN(dateObj.getTime()));
+
                   return (
                     <tr key={att._id || att.refCode} className="hover:bg-[#F4F7FE] transition-colors">
                       <td className="py-5 pl-6 font-mono font-bold text-sm">
-                        <Link 
+                        <Link
                           href={`/attendees/${attendeeRouteId}`}
                           onClick={() => handleCacheAttendee(att)}
                           className="text-[#B58E29] hover:underline"
@@ -208,7 +223,7 @@ export default function AttendeesDirectory({
                         </Link>
                       </td>
                       <td className="py-5 px-4">
-                        <Link 
+                        <Link
                           href={`/attendees/${attendeeRouteId}`}
                           onClick={() => handleCacheAttendee(att)}
                           className="font-bold text-[#1B254B] hover:text-[#B58E29] text-base transition-colors block"
@@ -224,86 +239,81 @@ export default function AttendeesDirectory({
                         {att.phone && <div className="text-xs text-[#707EAE] mt-0.5">{att.phone}</div>}
                       </td>
                       <td className="py-5 px-4 capitalize">
-                        <span className={`px-3.5 py-1.5 rounded-full text-xs font-bold border ${
-                          att.ticketType === 'vip' 
+                        <span className={`px-3.5 py-1.5 rounded-full text-xs font-bold border ${att.ticketType === 'vip'
                             ? 'bg-[#FFF9E6] text-[#8F6E1C] border-[#F3DC82]'
-                            : (att.ticketType === 'catwalk-exclusive' 
+                            : (att.ticketType === 'catwalk-exclusive'
                               ? 'bg-[#F5F3FF] text-[#6D28D9] border-[#DDD6FE]'
                               : 'bg-[#F4F7FE] text-[#2B3674] border-[#E0E5F2]')
-                        }`}>
+                          }`}>
                           {att.ticketType.replace('-', ' ')}
                         </span>
                       </td>
-                      <td className="py-5 px-4 text-sm font-medium whitespace-nowrap">
-                        {(() => {
-                          const rawDate = att.registeredAt || att.createdAt;
-                          const dateObj = rawDate ? new Date(rawDate) : null;
-                          if (!dateObj || isNaN(dateObj.getTime())) {
-                            return <span className="text-[#A3AED0] text-xs">No data</span>;
-                          }
-                          return (
-                            <div>
-                              <div className="text-[#1B254B] font-semibold text-xs">
-                                {dateObj.toLocaleDateString('en-GB', {
-                                  day: 'numeric',
-                                  month: 'short',
-                                  year: 'numeric'
+                        <td className="py-5 px-4 text-sm font-medium text-[#1B254B] whitespace-nowrap">
+                          {isValidDate ? (
+                            dateObj!.toLocaleDateString('en-GB', {
+                              day: 'numeric',
+                              month: 'short',
+                              year: 'numeric'
+                            })
+                          ) : (
+                            <span className="text-[#A3AED0] text-xs">No data</span>
+                          )}
+                        </td>
+                        <td className="py-5 px-4 whitespace-nowrap">
+                          {isValidDate ? (
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#F4F7FE] border border-[#E0E5F2] font-mono text-[11px] text-[#1B254B]">
+                              <Clock className="w-3 h-3 text-[#B58E29]" />
+                              <span>
+                                {dateObj!.toLocaleTimeString('en-GB', {
+                                  hour: '2-digit',
+                                  minute: '2-digit'
                                 })}
-                              </div>
-                              <div className="text-[11px] text-[#707EAE] mt-0.5 flex items-center gap-1 font-medium">
-                                <Clock className="w-3 h-3 text-[#A3AED0]" />
-                                <span>
-                                  {dateObj.toLocaleTimeString('en-GB', {
-                                    hour: '2-digit',
-                                    minute: '2-digit'
-                                  })}
-                                </span>
-                              </div>
-                            </div>
-                          );
-                        })()}
-                      </td>
-                      <td className="py-5 px-4">
-                        {att.checkedIn ? (
-                          <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold bg-[#10B981]/15 text-[#10B981] border border-[#10B981]/30">
-                            <CheckCircle2 className="w-4 h-4" />
-                            <span>Checked In</span>
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold bg-[#707EAE]/15 text-[#707EAE] border border-[#707EAE]/30">
-                            <Clock className="w-4 h-4" />
-                            <span>Pending Arrival</span>
-                          </span>
-                        )}
-                      </td>
-                      <td className="py-5 pr-6 text-right">
-                        <div className="flex items-center justify-end gap-2">
-                          <Link
-                            href={`/attendees/${attendeeRouteId}`}
-                            onClick={() => handleCacheAttendee(att)}
-                            className="px-3 py-2 rounded-xl bg-[#F4F7FE] hover:bg-[#EAEFFD] text-[#1B254B] border border-[#E0E5F2] font-bold text-xs flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs"
-                          >
-                            <Eye className="w-4 h-4 text-[#B58E29]" />
-                            <span>View</span>
-                          </Link>
+                              </span>
+                            </span>
+                          ) : (
+                            <span className="text-[#A3AED0] text-xs">--:--</span>
+                          )}
+                        </td>
+                        <td className="py-5 px-4">
+                          {att.checkedIn ? (
+                            <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold bg-[#10B981]/15 text-[#10B981] border border-[#10B981]/30">
+                              <CheckCircle2 className="w-4 h-4" />
+                              <span>Checked In</span>
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold bg-[#707EAE]/15 text-[#707EAE] border border-[#707EAE]/30">
+                              <Clock className="w-4 h-4" />
+                              <span>Pending Arrival</span>
+                            </span>
+                          )}
+                        </td>
+                        <td className="py-5 pr-6 text-right">
+                          <div className="flex items-center justify-end gap-2">
+                            <Link
+                              href={`/attendees/${attendeeRouteId}`}
+                              onClick={() => handleCacheAttendee(att)}
+                              className="px-3 py-2 rounded-xl bg-[#F4F7FE] hover:bg-[#EAEFFD] text-[#1B254B] border border-[#E0E5F2] font-bold text-xs flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs"
+                            >
+                              <Eye className="w-4 h-4 text-[#B58E29]" />
+                              <span>View</span>
+                            </Link>
 
-                        <button
-                          type="button"
-                          onClick={() => handleToggle(att._id)}
-                          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer ${
-                            att.checkedIn
-                              ? 'bg-[#FFF5F5] text-[#EF4444] border border-[#FCA5A5]/40 hover:bg-[#FEE2E2]'
-                              : 'bg-[#D4AF37] hover:bg-[#B58E29] text-[#070506]'
-                          }`}
-                        >
-                          {att.checkedIn ? 'Revoke Check-In' : 'Check In'}
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })
-            )}
+                            <button
+                              type="button"
+                              onClick={() => handleToggle(att._id)}
+                              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer ${att.checkedIn
+                                  ? 'bg-[#FFF5F5] text-[#EF4444] border border-[#FCA5A5]/40 hover:bg-[#FEE2E2]'
+                                  : 'bg-[#D4AF37] hover:bg-[#B58E29] text-[#070506]'
+                                }`}
+                            >
+                              {att.checkedIn ? 'Revoke Check-In' : 'Check In'}
+                            </button>
+                          </div>
+                        </td>
+                    </tr>
+                  );
+                })
+              )}
             </tbody>
           </table>
         </div>

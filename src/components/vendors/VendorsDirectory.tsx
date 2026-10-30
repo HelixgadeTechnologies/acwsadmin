@@ -107,7 +107,8 @@ export default function VendorsDirectory({
       'Base Location',
       'Payment Tier',
       'Status',
-      'Registration Date & Time'
+      'Registration Date',
+      'Registration Time'
     ];
 
     const rows = filteredVendors.map(v => [
@@ -120,7 +121,8 @@ export default function VendorsDirectory({
       `"${(v.baseLocation || '').replace(/"/g, '""')}"`,
       `"${v.paymentTier}"`,
       `"${v.status}"`,
-      `"${v.createdAt ? new Date(v.createdAt).toLocaleString('en-GB') : ''}"`
+        `"${v.createdAt ? new Date(v.createdAt).toLocaleDateString('en-GB') : ''}"`,
+      `"${v.createdAt ? new Date(v.createdAt).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) : ''}"`
     ]);
 
     const csvContent = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
@@ -266,153 +268,157 @@ export default function VendorsDirectory({
                 <th className="py-4.5 px-4">Category</th>
                 <th className="py-4.5 px-4">Stand Tier</th>
                 <th className="py-4.5 px-4">Status</th>
-                <th className="py-4.5 px-4">Registered At</th>
+                <th className="py-4.5 px-4">Date</th>
+                <th className="py-4.5 px-4">Time</th>
                 <th className="py-4.5 pr-6 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#E0E5F2]">
               {paginatedVendors.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="text-center py-16 text-[#A3AED0] text-sm font-semibold">
-                    No data
-                  </td>
+                    <td colSpan={8} className="text-center py-16 text-[#A3AED0] text-sm font-semibold">
+                      No data
+                    </td>
                 </tr>
               ) : (
-                paginatedVendors.map((v) => (
-                  <tr key={v._id} className="hover:bg-[#F4F7FE] transition-colors group">
-                    <td className="py-5 pl-6 font-mono font-bold text-[#B58E29] text-sm">
-                      {v.refCode}
-                    </td>
-                    <td className="py-5 px-4">
-                      <Link
-                        href={`/vendors/${v._id}`}
-                        className="font-bold text-[#1B254B] hover:text-[#B58E29] transition-colors text-base block"
-                      >
-                        {v.businessName}
-                      </Link>
-                      <div className="text-xs text-[#707EAE] mt-1">
-                        {v.contactName || v.contactPerson || v.email}
-                      </div>
-                    </td>
-                    <td className="py-5 px-4 text-[#1B254B] font-medium text-sm">
-                      {v.category}
-                    </td>
-                    <td className="py-5 px-4 capitalize text-[#1B254B]">
-                      <span className="px-3.5 py-1 rounded-lg bg-[#F4F7FE] border border-[#E0E5F2] font-semibold text-xs tracking-wide">
-                        {v.paymentTier}
-                      </span>
-                    </td>
-                    <td className="py-5 px-4">
-                      {getStatusPill(v.status)}
-                    </td>
-                    <td className="py-5 px-4 text-sm font-medium whitespace-nowrap">
-                      {(() => {
-                        const dateObj = v.createdAt ? new Date(v.createdAt) : null;
-                        if (!dateObj || isNaN(dateObj.getTime())) {
-                          return <span className="text-[#A3AED0] text-xs">No data</span>;
-                        }
-                        return (
-                          <div>
-                            <div className="text-[#1B254B] font-semibold text-xs">
-                              {dateObj.toLocaleDateString('en-GB', {
-                                day: 'numeric',
-                                month: 'short',
-                                year: 'numeric'
-                              })}
-                            </div>
-                            <div className="text-[11px] text-[#707EAE] mt-0.5 flex items-center gap-1 font-medium">
-                              <Clock className="w-3 h-3 text-[#A3AED0]" />
-                              <span>
-                                {dateObj.toLocaleTimeString('en-GB', {
-                                  hour: '2-digit',
-                                  minute: '2-digit'
-                                })}
-                              </span>
-                            </div>
-                          </div>
-                        );
-                      })()}
-                    </td>
-                    <td className="py-5 pr-6 text-right">
-                      <div className="flex items-center justify-end gap-2.5" data-action-menu>
-                        <Link
-                          href={`/vendors/${v._id}`}
-                          className="px-3.5 py-2 rounded-xl bg-[#D4AF37] hover:bg-[#B58E29] text-[#070506] font-bold text-xs shadow-xs transition-colors flex items-center gap-1.5 cursor-pointer"
-                        >
-                          <Eye className="w-4 h-4" />
-                          <span>View</span>
-                        </Link>
+                paginatedVendors.map((v) => {
+                                  const dateObj = v.createdAt ? new Date(v.createdAt) : null;
+                                  const isValidDate = Boolean(dateObj && !isNaN(dateObj.getTime()));
 
-                        <div className="relative">
-                          <button
-                            type="button"
-                            onClick={() => setOpenActionMenuId(openActionMenuId === v._id ? null : v._id)}
-                            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#F4F7FE] hover:bg-[#E0E5F2] text-[#2B3674] text-xs font-bold border border-[#E0E5F2] shadow-xs cursor-pointer"
-                          >
-                            <span>Actions</span>
-                            <ChevronDown className={`w-3.5 h-3.5 transition-transform ${openActionMenuId === v._id ? 'rotate-180' : ''}`} />
-                          </button>
+                                  return (
+                                    <tr key={v._id} className="hover:bg-[#F4F7FE] transition-colors group">
+                                      <td className="py-5 pl-6 font-mono font-bold text-[#B58E29] text-sm">
+                                        {v.refCode}
+                                      </td>
+                                      <td className="py-5 px-4">
+                                        <Link
+                                          href={`/vendors/${v._id}`}
+                                          className="font-bold text-[#1B254B] hover:text-[#B58E29] transition-colors text-base block"
+                                        >
+                                          {v.businessName}
+                                        </Link>
+                                        <div className="text-xs text-[#707EAE] mt-1">
+                                          {v.contactName || v.contactPerson || v.email}
+                                        </div>
+                                      </td>
+                                      <td className="py-5 px-4 text-[#1B254B] font-medium text-sm">
+                                        {v.category}
+                                      </td>
+                                      <td className="py-5 px-4 capitalize text-[#1B254B]">
+                                        <span className="px-3.5 py-1 rounded-lg bg-[#F4F7FE] border border-[#E0E5F2] font-semibold text-xs tracking-wide">
+                                          {v.paymentTier}
+                                        </span>
+                                      </td>
+                                      <td className="py-5 px-4">
+                                        {getStatusPill(v.status)}
+                                      </td>
+                                      <td className="py-5 px-4 text-sm font-medium text-[#1B254B] whitespace-nowrap">
+                                        {isValidDate ? (
+                                          dateObj!.toLocaleDateString('en-GB', {
+                                            day: 'numeric',
+                                            month: 'short',
+                                            year: 'numeric'
+                                          })
+                                        ) : (
+                                          <span className="text-[#A3AED0] text-xs">No data</span>
+                                        )}
+                                      </td>
+                                      <td className="py-5 px-4 whitespace-nowrap">
+                                        {isValidDate ? (
+                                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#F4F7FE] border border-[#E0E5F2] font-mono text-[11px] text-[#1B254B]">
+                                            <Clock className="w-3 h-3 text-[#B58E29]" />
+                                            <span>
+                                              {dateObj!.toLocaleTimeString('en-GB', {
+                                                hour: '2-digit',
+                                                minute: '2-digit'
+                                              })}
+                                      </span>
+                                    </span>
+                                  ) : (
+                              <span className="text-[#A3AED0] text-xs">--:--</span>
+                        )}
+                            </td>
+                            <td className="py-5 pr-6 text-right">
+                              <div className="flex items-center justify-end gap-2.5" data-action-menu>
+                                <Link
+                                  href={`/vendors/${v._id}`}
+                                  className="px-3.5 py-2 rounded-xl bg-[#D4AF37] hover:bg-[#B58E29] text-[#070506] font-bold text-xs shadow-xs transition-colors flex items-center gap-1.5 cursor-pointer"
+                                >
+                                  <Eye className="w-4 h-4" />
+                                  <span>View</span>
+                                </Link>
 
-                          {openActionMenuId === v._id && (
-                            <div className="absolute right-0 top-full mt-1.5 w-48 bg-white rounded-2xl shadow-xl border border-[#E0E5F2] py-1.5 z-30 divide-y divide-[#E0E5F2] text-left">
-                              <div className="px-3.5 py-1 text-[10px] font-bold text-[#A3AED0] uppercase tracking-wider">
-                                Update Status
+                                <div className="relative">
+                                  <button
+                                    type="button"
+                                    onClick={() => setOpenActionMenuId(openActionMenuId === v._id ? null : v._id)}
+                                    className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#F4F7FE] hover:bg-[#E0E5F2] text-[#2B3674] text-xs font-bold border border-[#E0E5F2] shadow-xs cursor-pointer"
+                                  >
+                                    <span>Actions</span>
+                                    <ChevronDown className={`w-3.5 h-3.5 transition-transform ${openActionMenuId === v._id ? 'rotate-180' : ''}`} />
+                                  </button>
+
+                                  {openActionMenuId === v._id && (
+                                    <div className="absolute right-0 top-full mt-1.5 w-48 bg-white rounded-2xl shadow-xl border border-[#E0E5F2] py-1.5 z-30 divide-y divide-[#E0E5F2] text-left">
+                                      <div className="px-3.5 py-1 text-[10px] font-bold text-[#A3AED0] uppercase tracking-wider">
+                                        Update Status
+                                      </div>
+                                      <div className="p-1 space-y-0.5">
+                                        <button
+                                          onClick={() => {
+                                            handleAction(v._id, 'approved');
+                                            setOpenActionMenuId(null);
+                                          }}
+                                          className={`w-full px-3 py-2 text-xs font-bold rounded-xl flex items-center gap-2 cursor-pointer ${v.status === 'approved' ? 'bg-[#10B981]/15 text-[#10B981]' : 'text-[#10B981] hover:bg-[#10B981]/10'
+                                            }`}
+                                        >
+                                          <Check className="w-4 h-4" />
+                                          <span>Approve</span>
+                                        </button>
+                                        <button
+                                          onClick={() => {
+                                            handleAction(v._id, 'waitlisted');
+                                            setOpenActionMenuId(null);
+                                          }}
+                                          className={`w-full px-3 py-2 text-xs font-bold rounded-xl flex items-center gap-2 cursor-pointer ${v.status === 'waitlisted' ? 'bg-[#F59E0B]/15 text-[#F59E0B]' : 'text-[#F59E0B] hover:bg-[#F59E0B]/10'
+                                            }`}
+                                        >
+                                          <Clock className="w-4 h-4" />
+                                          <span>Waitlist</span>
+                                        </button>
+                                        <button
+                                          onClick={() => {
+                                            handleAction(v._id, 'rejected');
+                                            setOpenActionMenuId(null);
+                                          }}
+                                          className={`w-full px-3 py-2 text-xs font-bold rounded-xl flex items-center gap-2 cursor-pointer ${v.status === 'rejected' ? 'bg-[#EF4444]/15 text-[#EF4444]' : 'text-[#EF4444] hover:bg-[#EF4444]/10'
+                                            }`}
+                                        >
+                                          <X className="w-4 h-4" />
+                                          <span>Decline</span>
+                                        </button>
+                                        <button
+                                          onClick={() => {
+                                            handleAction(v._id, 'pending');
+                                            setOpenActionMenuId(null);
+                                          }}
+                                          className={`w-full px-3 py-2 text-xs font-semibold rounded-xl flex items-center gap-2 cursor-pointer ${v.status === 'pending' ? 'bg-[#707EAE]/15 text-[#707EAE]' : 'text-[#707EAE] hover:bg-[#F4F7FE]'
+                                            }`}
+                                        >
+                                          <Clock className="w-4 h-4" />
+                                          <span>Mark Pending</span>
+                                        </button>
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
                               </div>
-                              <div className="p-1 space-y-0.5">
-                                <button
-                                  onClick={() => {
-                                    handleAction(v._id, 'approved');
-                                    setOpenActionMenuId(null);
-                                  }}
-                                  className={`w-full px-3 py-2 text-xs font-bold rounded-xl flex items-center gap-2 cursor-pointer ${v.status === 'approved' ? 'bg-[#10B981]/15 text-[#10B981]' : 'text-[#10B981] hover:bg-[#10B981]/10'
-                                    }`}
-                                >
-                                  <Check className="w-4 h-4" />
-                                  <span>Approve</span>
-                                </button>
-                                <button
-                                  onClick={() => {
-                                    handleAction(v._id, 'waitlisted');
-                                    setOpenActionMenuId(null);
-                                  }}
-                                  className={`w-full px-3 py-2 text-xs font-bold rounded-xl flex items-center gap-2 cursor-pointer ${v.status === 'waitlisted' ? 'bg-[#F59E0B]/15 text-[#F59E0B]' : 'text-[#F59E0B] hover:bg-[#F59E0B]/10'
-                                    }`}
-                                >
-                                  <Clock className="w-4 h-4" />
-                                  <span>Waitlist</span>
-                                </button>
-                                <button
-                                  onClick={() => {
-                                    handleAction(v._id, 'rejected');
-                                    setOpenActionMenuId(null);
-                                  }}
-                                  className={`w-full px-3 py-2 text-xs font-bold rounded-xl flex items-center gap-2 cursor-pointer ${v.status === 'rejected' ? 'bg-[#EF4444]/15 text-[#EF4444]' : 'text-[#EF4444] hover:bg-[#EF4444]/10'
-                                    }`}
-                                >
-                                  <X className="w-4 h-4" />
-                                  <span>Decline</span>
-                                </button>
-                                <button
-                                  onClick={() => {
-                                    handleAction(v._id, 'pending');
-                                    setOpenActionMenuId(null);
-                                  }}
-                                  className={`w-full px-3 py-2 text-xs font-semibold rounded-xl flex items-center gap-2 cursor-pointer ${v.status === 'pending' ? 'bg-[#707EAE]/15 text-[#707EAE]' : 'text-[#707EAE] hover:bg-[#F4F7FE]'
-                                    }`}
-                                >
-                                  <Clock className="w-4 h-4" />
-                                  <span>Mark Pending</span>
-                                </button>
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
+                            </td>
+                          </tr>
+                    );
+              })
+            )}
+                  </tbody>
           </table>
         </div>
 
