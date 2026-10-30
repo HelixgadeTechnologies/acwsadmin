@@ -56,7 +56,7 @@ export default function AttendeesDirectory({
   };
 
   const exportCsv = () => {
-    const headers = ['Ref Code', 'Full Name', 'Partner Name', 'Email', 'Phone', 'Ticket Type', 'Checked In'];
+    const headers = ['Ref Code', 'Full Name', 'Partner Name', 'Email', 'Phone', 'Ticket Type', 'Registration Date & Time', 'Checked In'];
     const rows = filteredAttendees.map(a => [
       `"${a.refCode}"`,
       `"${a.fullName}"`,
@@ -64,6 +64,7 @@ export default function AttendeesDirectory({
       `"${a.email}"`,
       `"${a.phone || ''}"`,
       `"${a.ticketType}"`,
+      `"${a.registeredAt || a.createdAt ? new Date(a.registeredAt || a.createdAt!).toLocaleString('en-GB') : ''}"`,
       `"${a.checkedIn ? 'Yes' : 'No'}"`
     ]);
 
@@ -180,6 +181,7 @@ export default function AttendeesDirectory({
                 <th className="py-4.5 px-4">Guest & Partner</th>
                 <th className="py-4.5 px-4">Contact Details</th>
                 <th className="py-4.5 px-4">Ticket Type</th>
+                <th className="py-4.5 px-4">Registered At</th>
                 <th className="py-4.5 px-4">Venue Check-In</th>
                 <th className="py-4.5 pr-6 text-right">Action</th>
               </tr>
@@ -187,7 +189,7 @@ export default function AttendeesDirectory({
             <tbody className="divide-y divide-[#E0E5F2]">
               {filteredAttendees.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="text-center py-16 text-[#A3AED0] text-sm font-semibold">
+                  <td colSpan={7} className="text-center py-16 text-[#A3AED0] text-sm font-semibold">
                     No data
                   </td>
                 </tr>
@@ -231,6 +233,35 @@ export default function AttendeesDirectory({
                         }`}>
                           {att.ticketType.replace('-', ' ')}
                         </span>
+                      </td>
+                      <td className="py-5 px-4 text-sm font-medium whitespace-nowrap">
+                        {(() => {
+                          const rawDate = att.registeredAt || att.createdAt;
+                          const dateObj = rawDate ? new Date(rawDate) : null;
+                          if (!dateObj || isNaN(dateObj.getTime())) {
+                            return <span className="text-[#A3AED0] text-xs">No data</span>;
+                          }
+                          return (
+                            <div>
+                              <div className="text-[#1B254B] font-semibold text-xs">
+                                {dateObj.toLocaleDateString('en-GB', {
+                                  day: 'numeric',
+                                  month: 'short',
+                                  year: 'numeric'
+                                })}
+                              </div>
+                              <div className="text-[11px] text-[#707EAE] mt-0.5 flex items-center gap-1 font-medium">
+                                <Clock className="w-3 h-3 text-[#A3AED0]" />
+                                <span>
+                                  {dateObj.toLocaleTimeString('en-GB', {
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                  })}
+                                </span>
+                              </div>
+                            </div>
+                          );
+                        })()}
                       </td>
                       <td className="py-5 px-4">
                         {att.checkedIn ? (

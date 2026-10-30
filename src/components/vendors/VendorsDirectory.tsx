@@ -4,14 +4,14 @@ import React, { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
 import { Vendor, VendorStatus } from '@/types';
 import VendorStatCards from './VendorStatCards';
-import { 
-  Search, 
-  Download, 
-  Eye, 
-  Check, 
-  X, 
-  Clock, 
-  ChevronLeft, 
+import {
+  Search,
+  Download,
+  Eye,
+  Check,
+  X,
+  Clock,
+  ChevronLeft,
   ChevronRight,
   MoreHorizontal,
   ChevronDown
@@ -107,7 +107,7 @@ export default function VendorsDirectory({
       'Base Location',
       'Payment Tier',
       'Status',
-      'Submission Date'
+      'Registration Date & Time'
     ];
 
     const rows = filteredVendors.map(v => [
@@ -120,7 +120,7 @@ export default function VendorsDirectory({
       `"${(v.baseLocation || '').replace(/"/g, '""')}"`,
       `"${v.paymentTier}"`,
       `"${v.status}"`,
-      `"${new Date(v.createdAt).toLocaleDateString('en-GB')}"`
+      `"${v.createdAt ? new Date(v.createdAt).toLocaleString('en-GB') : ''}"`
     ]);
 
     const csvContent = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
@@ -266,7 +266,7 @@ export default function VendorsDirectory({
                 <th className="py-4.5 px-4">Category</th>
                 <th className="py-4.5 px-4">Stand Tier</th>
                 <th className="py-4.5 px-4">Status</th>
-                <th className="py-4.5 px-4">Date</th>
+                <th className="py-4.5 px-4">Registered At</th>
                 <th className="py-4.5 pr-6 text-right">Actions</th>
               </tr>
             </thead>
@@ -284,8 +284,8 @@ export default function VendorsDirectory({
                       {v.refCode}
                     </td>
                     <td className="py-5 px-4">
-                      <Link 
-                        href={`/vendors/${v._id}`} 
+                      <Link
+                        href={`/vendors/${v._id}`}
                         className="font-bold text-[#1B254B] hover:text-[#B58E29] transition-colors text-base block"
                       >
                         {v.businessName}
@@ -305,8 +305,33 @@ export default function VendorsDirectory({
                     <td className="py-5 px-4">
                       {getStatusPill(v.status)}
                     </td>
-                    <td className="py-5 px-4 text-[#707EAE] text-sm font-medium">
-                      {new Date(v.createdAt).toLocaleDateString('en-GB')}
+                    <td className="py-5 px-4 text-sm font-medium whitespace-nowrap">
+                      {(() => {
+                        const dateObj = v.createdAt ? new Date(v.createdAt) : null;
+                        if (!dateObj || isNaN(dateObj.getTime())) {
+                          return <span className="text-[#A3AED0] text-xs">No data</span>;
+                        }
+                        return (
+                          <div>
+                            <div className="text-[#1B254B] font-semibold text-xs">
+                              {dateObj.toLocaleDateString('en-GB', {
+                                day: 'numeric',
+                                month: 'short',
+                                year: 'numeric'
+                              })}
+                            </div>
+                            <div className="text-[11px] text-[#707EAE] mt-0.5 flex items-center gap-1 font-medium">
+                              <Clock className="w-3 h-3 text-[#A3AED0]" />
+                              <span>
+                                {dateObj.toLocaleTimeString('en-GB', {
+                                  hour: '2-digit',
+                                  minute: '2-digit'
+                                })}
+                              </span>
+                            </div>
+                          </div>
+                        );
+                      })()}
                     </td>
                     <td className="py-5 pr-6 text-right">
                       <div className="flex items-center justify-end gap-2.5" data-action-menu>
@@ -339,9 +364,8 @@ export default function VendorsDirectory({
                                     handleAction(v._id, 'approved');
                                     setOpenActionMenuId(null);
                                   }}
-                                  className={`w-full px-3 py-2 text-xs font-bold rounded-xl flex items-center gap-2 cursor-pointer ${
-                                    v.status === 'approved' ? 'bg-[#10B981]/15 text-[#10B981]' : 'text-[#10B981] hover:bg-[#10B981]/10'
-                                  }`}
+                                  className={`w-full px-3 py-2 text-xs font-bold rounded-xl flex items-center gap-2 cursor-pointer ${v.status === 'approved' ? 'bg-[#10B981]/15 text-[#10B981]' : 'text-[#10B981] hover:bg-[#10B981]/10'
+                                    }`}
                                 >
                                   <Check className="w-4 h-4" />
                                   <span>Approve</span>
@@ -351,9 +375,8 @@ export default function VendorsDirectory({
                                     handleAction(v._id, 'waitlisted');
                                     setOpenActionMenuId(null);
                                   }}
-                                  className={`w-full px-3 py-2 text-xs font-bold rounded-xl flex items-center gap-2 cursor-pointer ${
-                                    v.status === 'waitlisted' ? 'bg-[#F59E0B]/15 text-[#F59E0B]' : 'text-[#F59E0B] hover:bg-[#F59E0B]/10'
-                                  }`}
+                                  className={`w-full px-3 py-2 text-xs font-bold rounded-xl flex items-center gap-2 cursor-pointer ${v.status === 'waitlisted' ? 'bg-[#F59E0B]/15 text-[#F59E0B]' : 'text-[#F59E0B] hover:bg-[#F59E0B]/10'
+                                    }`}
                                 >
                                   <Clock className="w-4 h-4" />
                                   <span>Waitlist</span>
@@ -363,9 +386,8 @@ export default function VendorsDirectory({
                                     handleAction(v._id, 'rejected');
                                     setOpenActionMenuId(null);
                                   }}
-                                  className={`w-full px-3 py-2 text-xs font-bold rounded-xl flex items-center gap-2 cursor-pointer ${
-                                    v.status === 'rejected' ? 'bg-[#EF4444]/15 text-[#EF4444]' : 'text-[#EF4444] hover:bg-[#EF4444]/10'
-                                  }`}
+                                  className={`w-full px-3 py-2 text-xs font-bold rounded-xl flex items-center gap-2 cursor-pointer ${v.status === 'rejected' ? 'bg-[#EF4444]/15 text-[#EF4444]' : 'text-[#EF4444] hover:bg-[#EF4444]/10'
+                                    }`}
                                 >
                                   <X className="w-4 h-4" />
                                   <span>Decline</span>
@@ -375,9 +397,8 @@ export default function VendorsDirectory({
                                     handleAction(v._id, 'pending');
                                     setOpenActionMenuId(null);
                                   }}
-                                  className={`w-full px-3 py-2 text-xs font-semibold rounded-xl flex items-center gap-2 cursor-pointer ${
-                                    v.status === 'pending' ? 'bg-[#707EAE]/15 text-[#707EAE]' : 'text-[#707EAE] hover:bg-[#F4F7FE]'
-                                  }`}
+                                  className={`w-full px-3 py-2 text-xs font-semibold rounded-xl flex items-center gap-2 cursor-pointer ${v.status === 'pending' ? 'bg-[#707EAE]/15 text-[#707EAE]' : 'text-[#707EAE] hover:bg-[#F4F7FE]'
+                                    }`}
                                 >
                                   <Clock className="w-4 h-4" />
                                   <span>Mark Pending</span>
