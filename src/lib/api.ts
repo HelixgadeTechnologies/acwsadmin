@@ -9,6 +9,7 @@ function normalizeVendor(v: any): Vendor {
     ...v,
     contactName: v.contactName || v.contactPerson || '',
     contactPerson: v.contactPerson || v.contactName || '',
+    phone: v.phone || v.phoneNumber || v.telephone || v.mobile || '',
     notes: v.notes || v.curatorNotes || '',
     curatorNotes: v.curatorNotes || v.notes || '',
     paymentTier: v.paymentTier || 'standard',
@@ -22,6 +23,7 @@ function normalizeAttendee(a: any): Attendee {
   return {
     ...a,
     _id: a._id || a.id || '',
+    phone: a.phone || a.phoneNumber || a.telephone || a.mobile || a.contactPhone || '',
     registeredAt: a.registeredAt || a.createdAt || new Date().toISOString(),
     checkedIn: Boolean(a.checkedIn)
   };

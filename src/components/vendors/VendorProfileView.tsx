@@ -4,15 +4,16 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import QRCode from 'qrcode';
 import { Vendor, VendorStatus } from '@/types';
-import { 
-  ArrowLeft, 
-  Copy, 
-  Check, 
+import {
+  ArrowLeft,
+  Copy,
+  Check,
   X,
-  ShieldCheck, 
-  Globe, 
-  Mail, 
-  Phone, 
+  ShieldCheck,
+  Globe,
+  Mail,
+  Phone,
+  MapPin,
   ExternalLink,
   Clock,
   MoreHorizontal,
@@ -171,11 +172,10 @@ export default function VendorProfileView({
                       handleStatusUpdate('approved');
                       setHeaderDropdownOpen(false);
                     }}
-                    className={`w-full px-3 py-2 rounded-xl text-xs font-bold flex items-center justify-between transition-colors cursor-pointer ${
-                      vendor.status === 'approved'
+                    className={`w-full px-3 py-2 rounded-xl text-xs font-bold flex items-center justify-between transition-colors cursor-pointer ${vendor.status === 'approved'
                         ? 'bg-[#10B981]/15 text-[#10B981]'
                         : 'text-[#2B3674] hover:bg-[#F4F7FE]'
-                    }`}
+                      }`}
                   >
                     <span className="flex items-center gap-2">
                       <Check className="w-4 h-4 text-[#10B981]" />
@@ -189,11 +189,10 @@ export default function VendorProfileView({
                       handleStatusUpdate('waitlisted');
                       setHeaderDropdownOpen(false);
                     }}
-                    className={`w-full px-3 py-2 rounded-xl text-xs font-bold flex items-center justify-between transition-colors cursor-pointer ${
-                      vendor.status === 'waitlisted'
+                    className={`w-full px-3 py-2 rounded-xl text-xs font-bold flex items-center justify-between transition-colors cursor-pointer ${vendor.status === 'waitlisted'
                         ? 'bg-[#F59E0B]/15 text-[#F59E0B]'
                         : 'text-[#2B3674] hover:bg-[#F4F7FE]'
-                    }`}
+                      }`}
                   >
                     <span className="flex items-center gap-2">
                       <Clock className="w-4 h-4 text-[#F59E0B]" />
@@ -207,11 +206,10 @@ export default function VendorProfileView({
                       handleStatusUpdate('rejected');
                       setHeaderDropdownOpen(false);
                     }}
-                    className={`w-full px-3 py-2 rounded-xl text-xs font-bold flex items-center justify-between transition-colors cursor-pointer ${
-                      vendor.status === 'rejected'
+                    className={`w-full px-3 py-2 rounded-xl text-xs font-bold flex items-center justify-between transition-colors cursor-pointer ${vendor.status === 'rejected'
                         ? 'bg-[#EF4444]/15 text-[#EF4444]'
                         : 'text-[#EF4444] hover:bg-[#FFF5F5]'
-                    }`}
+                      }`}
                   >
                     <span className="flex items-center gap-2">
                       <X className="w-4 h-4 text-[#EF4444]" />
@@ -225,11 +223,10 @@ export default function VendorProfileView({
                       handleStatusUpdate('pending');
                       setHeaderDropdownOpen(false);
                     }}
-                    className={`w-full px-3 py-2 rounded-xl text-xs font-semibold flex items-center justify-between transition-colors cursor-pointer ${
-                      vendor.status === 'pending'
+                    className={`w-full px-3 py-2 rounded-xl text-xs font-semibold flex items-center justify-between transition-colors cursor-pointer ${vendor.status === 'pending'
                         ? 'bg-[#707EAE]/15 text-[#707EAE]'
                         : 'text-[#707EAE] hover:bg-[#F4F7FE]'
-                    }`}
+                      }`}
                   >
                     <span className="flex items-center gap-2">
                       <Clock className="w-4 h-4 text-[#707EAE]" />
@@ -298,8 +295,32 @@ export default function VendorProfileView({
           <div className="pt-12 pb-6 px-6 text-center">
             <h3 className="text-xl font-bold text-[#2B3674]">{vendor.businessName}</h3>
             <p className="text-xs font-medium text-[#707EAE] mt-1">
-              {vendor.category}{vendor.baseLocation ? ` • ${vendor.baseLocation}` : ''}
+              {vendor.category}
             </p>
+
+            {/* Quick Location & Phone Badges */}
+            <div className="flex items-center justify-center flex-wrap gap-2 mt-3 text-xs">
+              <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-[#FFF9E6] border border-[#F3DC82] font-semibold text-[#8F6E1C]">
+                <MapPin className="w-3.5 h-3.5 text-[#B58E29]" />
+                <span>{vendor.baseLocation || 'Location not specified'}</span>
+              </span>
+
+              {vendor.phone ? (
+                <a
+                  href={`tel:${vendor.phone}`}
+                  className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#10B981]/10 border border-[#10B981]/30 font-semibold text-[#10B981] hover:bg-[#10B981]/20 transition-colors"
+                  title="Call Vendor"
+                >
+                  <Phone className="w-3.5 h-3.5" />
+                  <span>{vendor.phone}</span>
+                </a>
+              ) : (
+                <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-[#F4F7FE] border border-[#E0E5F2] font-semibold text-[#A3AED0]">
+                  <Phone className="w-3.5 h-3.5" />
+                  <span>No phone</span>
+                </span>
+              )}
+            </div>
 
             <div className="grid grid-cols-3 gap-2 mt-6 pt-6 border-t border-[#E0E5F2] text-center">
               <div>
@@ -456,11 +477,10 @@ export default function VendorProfileView({
                       handleStatusUpdate('approved');
                       setCardDropdownOpen(false);
                     }}
-                    className={`w-full px-3 py-2.5 rounded-xl text-xs font-bold flex items-center justify-between transition-colors cursor-pointer ${
-                      vendor.status === 'approved'
+                    className={`w-full px-3 py-2.5 rounded-xl text-xs font-bold flex items-center justify-between transition-colors cursor-pointer ${vendor.status === 'approved'
                         ? 'bg-[#10B981]/15 text-[#10B981]'
                         : 'text-[#2B3674] hover:bg-[#F4F7FE]'
-                    }`}
+                      }`}
                   >
                     <span className="flex items-center gap-2">
                       <Check className="w-4 h-4 text-[#10B981]" />
@@ -474,11 +494,10 @@ export default function VendorProfileView({
                       handleStatusUpdate('waitlisted');
                       setCardDropdownOpen(false);
                     }}
-                    className={`w-full px-3 py-2.5 rounded-xl text-xs font-bold flex items-center justify-between transition-colors cursor-pointer ${
-                      vendor.status === 'waitlisted'
+                    className={`w-full px-3 py-2.5 rounded-xl text-xs font-bold flex items-center justify-between transition-colors cursor-pointer ${vendor.status === 'waitlisted'
                         ? 'bg-[#F59E0B]/15 text-[#F59E0B]'
                         : 'text-[#2B3674] hover:bg-[#F4F7FE]'
-                    }`}
+                      }`}
                   >
                     <span className="flex items-center gap-2">
                       <Clock className="w-4 h-4 text-[#F59E0B]" />
@@ -492,11 +511,10 @@ export default function VendorProfileView({
                       handleStatusUpdate('rejected');
                       setCardDropdownOpen(false);
                     }}
-                    className={`w-full px-3 py-2.5 rounded-xl text-xs font-bold flex items-center justify-between transition-colors cursor-pointer ${
-                      vendor.status === 'rejected'
+                    className={`w-full px-3 py-2.5 rounded-xl text-xs font-bold flex items-center justify-between transition-colors cursor-pointer ${vendor.status === 'rejected'
                         ? 'bg-[#EF4444]/15 text-[#EF4444]'
                         : 'text-[#EF4444] hover:bg-[#FFF5F5]'
-                    }`}
+                      }`}
                   >
                     <span className="flex items-center gap-2">
                       <X className="w-4 h-4 text-[#EF4444]" />
@@ -510,11 +528,10 @@ export default function VendorProfileView({
                       handleStatusUpdate('pending');
                       setCardDropdownOpen(false);
                     }}
-                    className={`w-full px-3 py-2.5 rounded-xl text-xs font-semibold flex items-center justify-between transition-colors cursor-pointer ${
-                      vendor.status === 'pending'
+                    className={`w-full px-3 py-2.5 rounded-xl text-xs font-semibold flex items-center justify-between transition-colors cursor-pointer ${vendor.status === 'pending'
                         ? 'bg-[#707EAE]/15 text-[#707EAE]'
                         : 'text-[#707EAE] hover:bg-[#F4F7FE]'
-                    }`}
+                      }`}
                   >
                     <span className="flex items-center gap-2">
                       <Clock className="w-4 h-4 text-[#707EAE]" />
@@ -591,7 +608,7 @@ export default function VendorProfileView({
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-xl bg-white text-[#E1306C] flex items-center justify-center shadow-xs border border-[#E0E5F2]">
                     <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
-                      <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                      <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
                     </svg>
                   </div>
                   <div>
@@ -675,9 +692,10 @@ export default function VendorProfileView({
 
             <div className="p-4 rounded-2xl bg-[#F4F7FE]">
               <p className="text-xs font-medium text-[#A3AED0]">Base Location</p>
-              <p className="text-sm font-bold text-[#2B3674] mt-1">
-                {vendor.baseLocation || 'No data'}
-              </p>
+                <p className="text-sm font-bold text-[#2B3674] mt-1 flex items-center gap-1.5">
+                  <MapPin className="w-4 h-4 text-[#B58E29] shrink-0" />
+                  <span>{vendor.baseLocation || 'No data'}</span>
+                </p>
             </div>
 
             <div className="p-4 rounded-2xl bg-[#F4F7FE]">

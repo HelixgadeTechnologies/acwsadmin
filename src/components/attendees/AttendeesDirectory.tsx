@@ -10,6 +10,8 @@ import {
   Download,
   CheckCircle2,
   Clock,
+  MapPin,
+  Phone,
   Eye
 } from 'lucide-react';
 import CsvImportModal from './CsvImportModal';
@@ -62,6 +64,7 @@ export default function AttendeesDirectory({
       'Partner Name',
       'Email',
       'Phone',
+      'Location',
       'Ticket Type',
       'Registration Date',
       'Registration Time',
@@ -73,6 +76,7 @@ export default function AttendeesDirectory({
       `"${a.partnerName || ''}"`,
       `"${a.email}"`,
       `"${a.phone || ''}"`,
+      `"${(a.weddingLocation || '').replace(/"/g, '""')}"`,
       `"${a.ticketType}"`,
       `"${a.registeredAt || a.createdAt ? new Date(a.registeredAt || a.createdAt!).toLocaleDateString('en-GB') : ''}"`,
       `"${a.registeredAt || a.createdAt ? new Date(a.registeredAt || a.createdAt!).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) : ''}"`,
@@ -169,8 +173,8 @@ export default function AttendeesDirectory({
         <button
           onClick={() => setStatusFilter(statusFilter === 'checkedIn' ? 'all' : 'checkedIn')}
           className={`px-3 py-2 rounded-xl border transition-all cursor-pointer font-bold ${statusFilter === 'checkedIn'
-              ? 'bg-[#10B981]/15 text-[#10B981] border-[#10B981]/40'
-              : 'bg-white text-[#707EAE] border-[#E0E5F2]'
+            ? 'bg-[#10B981]/15 text-[#10B981] border-[#10B981]/40'
+            : 'bg-white text-[#707EAE] border-[#E0E5F2]'
             }`}
         >
           Checked In Only
@@ -190,6 +194,7 @@ export default function AttendeesDirectory({
                 <th className="py-4.5 pl-6">Ref Code</th>
                 <th className="py-4.5 px-4">Guest & Partner</th>
                 <th className="py-4.5 px-4">Contact Details</th>
+                <th className="py-4.5 px-4">Location</th>
                 <th className="py-4.5 px-4">Ticket Type</th>
                 <th className="py-4.5 px-4">Date</th>
                 <th className="py-4.5 px-4">Time</th>
@@ -200,9 +205,9 @@ export default function AttendeesDirectory({
             <tbody className="divide-y divide-[#E0E5F2]">
               {filteredAttendees.length === 0 ? (
                 <tr>
-                    <td colSpan={8} className="text-center py-16 text-[#A3AED0] text-sm font-semibold">
-                      No data
-                    </td>
+                  <td colSpan={9} className="text-center py-16 text-[#A3AED0] text-sm font-semibold">
+                    No data
+                  </td>
                 </tr>
               ) : (
                 filteredAttendees.map((att) => {
@@ -236,80 +241,95 @@ export default function AttendeesDirectory({
                       </td>
                       <td className="py-5 px-4">
                         <div className="text-[#1B254B] font-medium text-sm">{att.email}</div>
-                        {att.phone && <div className="text-xs text-[#707EAE] mt-0.5">{att.phone}</div>}
+                        {att.phone && (
+                          <a
+                            href={`tel:${att.phone}`}
+                            className="inline-flex items-center gap-1 text-[11px] text-[#10B981] font-semibold mt-0.5 hover:underline"
+                            title="Call Attendee"
+                          >
+                            <Phone className="w-3 h-3" />
+                            <span>{att.phone}</span>
+                          </a>
+                        )}
+                      </td>
+                      <td className="py-5 px-4 text-xs font-semibold text-[#1B254B] whitespace-nowrap">
+                        <div className="inline-flex items-center gap-1.5">
+                          <MapPin className="w-3.5 h-3.5 text-[#B58E29] shrink-0" />
+                          <span className="truncate max-w-[140px]">{att.weddingLocation || 'No data'}</span>
+                        </div>
                       </td>
                       <td className="py-5 px-4 capitalize">
                         <span className={`px-3.5 py-1.5 rounded-full text-xs font-bold border ${att.ticketType === 'vip'
-                            ? 'bg-[#FFF9E6] text-[#8F6E1C] border-[#F3DC82]'
-                            : (att.ticketType === 'catwalk-exclusive'
-                              ? 'bg-[#F5F3FF] text-[#6D28D9] border-[#DDD6FE]'
-                              : 'bg-[#F4F7FE] text-[#2B3674] border-[#E0E5F2]')
+                          ? 'bg-[#FFF9E6] text-[#8F6E1C] border-[#F3DC82]'
+                          : (att.ticketType === 'catwalk-exclusive'
+                            ? 'bg-[#F5F3FF] text-[#6D28D9] border-[#DDD6FE]'
+                            : 'bg-[#F4F7FE] text-[#2B3674] border-[#E0E5F2]')
                           }`}>
                           {att.ticketType.replace('-', ' ')}
                         </span>
                       </td>
-                        <td className="py-5 px-4 text-sm font-medium text-[#1B254B] whitespace-nowrap">
-                          {isValidDate ? (
-                            dateObj!.toLocaleDateString('en-GB', {
-                              day: 'numeric',
-                              month: 'short',
-                              year: 'numeric'
-                            })
-                          ) : (
-                            <span className="text-[#A3AED0] text-xs">No data</span>
-                          )}
-                        </td>
-                        <td className="py-5 px-4 whitespace-nowrap">
-                          {isValidDate ? (
-                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#F4F7FE] border border-[#E0E5F2] font-mono text-[11px] text-[#1B254B]">
-                              <Clock className="w-3 h-3 text-[#B58E29]" />
-                              <span>
-                                {dateObj!.toLocaleTimeString('en-GB', {
-                                  hour: '2-digit',
-                                  minute: '2-digit'
-                                })}
-                              </span>
+                      <td className="py-5 px-4 text-sm font-medium text-[#1B254B] whitespace-nowrap">
+                        {isValidDate ? (
+                          dateObj!.toLocaleDateString('en-GB', {
+                            day: 'numeric',
+                            month: 'short',
+                            year: 'numeric'
+                          })
+                        ) : (
+                          <span className="text-[#A3AED0] text-xs">No data</span>
+                        )}
+                      </td>
+                      <td className="py-5 px-4 whitespace-nowrap">
+                        {isValidDate ? (
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#F4F7FE] border border-[#E0E5F2] font-mono text-[11px] text-[#1B254B]">
+                            <Clock className="w-3 h-3 text-[#B58E29]" />
+                            <span>
+                              {dateObj!.toLocaleTimeString('en-GB', {
+                                hour: '2-digit',
+                                minute: '2-digit'
+                              })}
                             </span>
-                          ) : (
-                            <span className="text-[#A3AED0] text-xs">--:--</span>
-                          )}
-                        </td>
-                        <td className="py-5 px-4">
-                          {att.checkedIn ? (
-                            <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold bg-[#10B981]/15 text-[#10B981] border border-[#10B981]/30">
-                              <CheckCircle2 className="w-4 h-4" />
-                              <span>Checked In</span>
-                            </span>
-                          ) : (
-                            <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold bg-[#707EAE]/15 text-[#707EAE] border border-[#707EAE]/30">
-                              <Clock className="w-4 h-4" />
-                              <span>Pending Arrival</span>
-                            </span>
-                          )}
-                        </td>
-                        <td className="py-5 pr-6 text-right">
-                          <div className="flex items-center justify-end gap-2">
-                            <Link
-                              href={`/attendees/${attendeeRouteId}`}
-                              onClick={() => handleCacheAttendee(att)}
-                              className="px-3 py-2 rounded-xl bg-[#F4F7FE] hover:bg-[#EAEFFD] text-[#1B254B] border border-[#E0E5F2] font-bold text-xs flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs"
-                            >
-                              <Eye className="w-4 h-4 text-[#B58E29]" />
-                              <span>View</span>
-                            </Link>
+                          </span>
+                        ) : (
+                          <span className="text-[#A3AED0] text-xs">--:--</span>
+                        )}
+                      </td>
+                      <td className="py-5 px-4">
+                        {att.checkedIn ? (
+                          <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold bg-[#10B981]/15 text-[#10B981] border border-[#10B981]/30">
+                            <CheckCircle2 className="w-4 h-4" />
+                            <span>Checked In</span>
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold bg-[#707EAE]/15 text-[#707EAE] border border-[#707EAE]/30">
+                            <Clock className="w-4 h-4" />
+                            <span>Pending Arrival</span>
+                          </span>
+                        )}
+                      </td>
+                      <td className="py-5 pr-6 text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          <Link
+                            href={`/attendees/${attendeeRouteId}`}
+                            onClick={() => handleCacheAttendee(att)}
+                            className="px-3 py-2 rounded-xl bg-[#F4F7FE] hover:bg-[#EAEFFD] text-[#1B254B] border border-[#E0E5F2] font-bold text-xs flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs"
+                          >
+                            <Eye className="w-4 h-4 text-[#B58E29]" />
+                            <span>View</span>
+                          </Link>
 
-                            <button
-                              type="button"
-                              onClick={() => handleToggle(att._id)}
-                              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer ${att.checkedIn
-                                  ? 'bg-[#FFF5F5] text-[#EF4444] border border-[#FCA5A5]/40 hover:bg-[#FEE2E2]'
-                                  : 'bg-[#D4AF37] hover:bg-[#B58E29] text-[#070506]'
-                                }`}
-                            >
-                              {att.checkedIn ? 'Revoke Check-In' : 'Check In'}
-                            </button>
-                          </div>
-                        </td>
+                          <button
+                            type="button"
+                            onClick={() => handleToggle(att._id)}
+                            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer ${att.checkedIn
+                              ? 'bg-[#FFF5F5] text-[#EF4444] border border-[#FCA5A5]/40 hover:bg-[#FEE2E2]'
+                              : 'bg-[#D4AF37] hover:bg-[#B58E29] text-[#070506]'
+                              }`}
+                          >
+                            {att.checkedIn ? 'Revoke Check-In' : 'Check In'}
+                          </button>
+                        </div>
+                      </td>
                     </tr>
                   );
                 })

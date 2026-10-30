@@ -4,22 +4,22 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import QRCode from 'qrcode';
 import { Attendee } from '@/types';
-import { 
-  ArrowLeft, 
-  Copy, 
-  Check, 
-  CheckCircle2, 
-  Clock, 
-  Mail, 
-  Phone, 
-  User, 
-  Heart, 
-  Calendar, 
-  MapPin, 
-  DollarSign, 
-  Users, 
-  Tag, 
-  Download, 
+import {
+  ArrowLeft,
+  Copy,
+  Check,
+  CheckCircle2,
+  Clock,
+  Mail,
+  Phone,
+  User,
+  Heart,
+  Calendar,
+  MapPin,
+  DollarSign,
+  Users,
+  Tag,
+  Download,
   ShieldCheck,
   QrCode,
   X,
@@ -159,11 +159,10 @@ export default function AttendeeProfileView({
             type="button"
             disabled={isUpdating}
             onClick={handleCheckinToggle}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer flex items-center gap-2 disabled:opacity-50 ${
-              attendee.checkedIn
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer flex items-center gap-2 disabled:opacity-50 ${attendee.checkedIn
                 ? 'bg-[#FFF5F5] text-[#EF4444] border border-[#FCA5A5]/40 hover:bg-[#FEE2E2]'
                 : 'bg-[#D4AF37] hover:bg-[#B58E29] text-[#070506]'
-            }`}
+              }`}
           >
             {isUpdating ? (
               <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
@@ -194,13 +193,12 @@ export default function AttendeeProfileView({
                 <h1 className="text-2xl sm:text-3xl font-extrabold text-[#1B254B] tracking-tight">
                   {attendee.fullName}
                 </h1>
-                <span className={`px-3 py-1 rounded-full text-xs font-bold border capitalize ${
-                  attendee.ticketType === 'vip' 
+                <span className={`px-3 py-1 rounded-full text-xs font-bold border capitalize ${attendee.ticketType === 'vip'
                     ? 'bg-[#FFF9E6] text-[#8F6E1C] border-[#F3DC82]'
-                    : (attendee.ticketType === 'catwalk-exclusive' 
+                    : (attendee.ticketType === 'catwalk-exclusive'
                       ? 'bg-[#F5F3FF] text-[#6D28D9] border-[#DDD6FE]'
                       : 'bg-[#F4F7FE] text-[#2B3674] border-[#E0E5F2]')
-                }`}>
+                  }`}>
                   {attendee.ticketType.replace('-', ' ')}
                 </span>
               </div>
@@ -212,15 +210,36 @@ export default function AttendeeProfileView({
                 </div>
               )}
 
-              <p className="text-xs text-[#A3AED0] mt-1">
-                Role: <strong className="text-[#1B254B]">{attendee.attendeeType || 'Guest'}</strong>
-                {attendee.weddingTimeframe && (
-                  <> • Target: <strong className="text-[#1B254B]">{attendee.weddingTimeframe}</strong></>
-                )}
-                {attendee.weddingLocation && (
-                  <> • Location: <strong className="text-[#1B254B]">{attendee.weddingLocation}</strong></>
-                )}
-              </p>
+                {/* Quick Location & Phone Badges */}
+                <div className="flex items-center flex-wrap gap-2 mt-2.5 text-xs">
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FFF9E6] border border-[#F3DC82] font-semibold text-[#8F6E1C]">
+                    <MapPin className="w-3.5 h-3.5 text-[#B58E29]" />
+                    <span>{attendee.weddingLocation || 'Location not specified'}</span>
+                  </span>
+
+                  {attendee.phone ? (
+                    <a
+                      href={`tel:${attendee.phone}`}
+                      className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#10B981]/10 border border-[#10B981]/30 font-semibold text-[#10B981] hover:bg-[#10B981]/20 transition-colors"
+                      title="Call Attendee"
+                    >
+                      <Phone className="w-3.5 h-3.5" />
+                      <span>{attendee.phone}</span>
+                    </a>
+                  ) : (
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#F4F7FE] border border-[#E0E5F2] font-semibold text-[#A3AED0]">
+                      <Phone className="w-3.5 h-3.5" />
+                      <span>No phone</span>
+                    </span>
+                  )}
+                </div>
+
+                <p className="text-xs text-[#A3AED0] mt-1.5">
+                  Role: <strong className="text-[#1B254B]">{attendee.attendeeType || 'Guest'}</strong>
+                  {attendee.weddingTimeframe && (
+                    <> • Target: <strong className="text-[#1B254B]">{attendee.weddingTimeframe}</strong></>
+                  )}
+                </p>
             </div>
           </div>
 
@@ -248,8 +267,8 @@ export default function AttendeeProfileView({
             <div className="space-y-4 text-xs">
               <div>
                 <span className="text-[11px] text-[#A3AED0] block font-semibold uppercase">Email Address</span>
-                <a 
-                  href={`mailto:${attendee.email}`} 
+                <a
+                  href={`mailto:${attendee.email}`}
                   className="font-bold text-[#1B254B] hover:text-[#B58E29] transition-colors flex items-center gap-2 mt-1 text-sm"
                 >
                   <Mail className="w-4 h-4 text-[#707EAE]" />
@@ -260,11 +279,12 @@ export default function AttendeeProfileView({
               <div>
                 <span className="text-[11px] text-[#A3AED0] block font-semibold uppercase">Phone Number</span>
                 {attendee.phone ? (
-                  <a 
-                    href={`tel:${attendee.phone}`} 
-                    className="font-bold text-[#1B254B] hover:text-[#B58E29] transition-colors flex items-center gap-2 mt-1 text-sm"
+                  <a
+                    href={`tel:${attendee.phone}`}
+                    className="font-bold text-[#10B981] hover:text-[#059669] transition-colors flex items-center gap-2 mt-1 text-sm"
+                    title="Call Attendee"
                   >
-                    <Phone className="w-4 h-4 text-[#707EAE]" />
+                    <Phone className="w-4 h-4 text-[#10B981]" />
                     <span>{attendee.phone}</span>
                   </a>
                 ) : (
