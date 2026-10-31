@@ -3,6 +3,22 @@ import { AdminUser, Attendee, KpiStats, Vendor, VendorStatus } from '@/types';
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://acwsbackend.onrender.com/api/v1';
 
 // Normalizer helpers ensuring full field compatibility between Mongo and React
+function extractDeviceInfo(record: any): any {
+  const rawDev = record?.deviceInfo ?? record?.device ?? record?.deviceMetadata ?? record?.clientInfo ?? record?.metadata?.deviceInfo;
+  if (!rawDev) return undefined;
+  if (typeof rawDev === 'string') {
+    try {
+      return JSON.parse(rawDev);
+    } catch {
+      if (rawDev.includes('Mozilla/') || rawDev.includes('AppleWebKit') || rawDev.includes('Mobile')) {
+        return { userAgent: rawDev };
+      }
+      return { raw: rawDev };
+    }
+  }
+  return rawDev;
+}
+
 function normalizeVendor(v: any): Vendor {
   if (!v) return v;
   return {
@@ -14,6 +30,7 @@ function normalizeVendor(v: any): Vendor {
     curatorNotes: v.curatorNotes || v.notes || '',
     paymentTier: v.paymentTier || 'standard',
     status: v.status || 'pending',
+    deviceInfo: extractDeviceInfo(v),
     createdAt: v.createdAt || new Date().toISOString()
   };
 }
@@ -25,7 +42,8 @@ function normalizeAttendee(a: any): Attendee {
     _id: a._id || a.id || '',
     phone: a.phone || a.phoneNumber || a.telephone || a.mobile || a.contactPhone || '',
     registeredAt: a.registeredAt || a.createdAt || new Date().toISOString(),
-    checkedIn: Boolean(a.checkedIn)
+    checkedIn: Boolean(a.checkedIn),
+    deviceInfo: extractDeviceInfo(a)
   };
 }
 
@@ -255,7 +273,8 @@ export class ApiService {
   static async getVendorById(id: string): Promise<Vendor | null> {
     try {
       const res = await this.request<{ data: any }>(`/admin/vendors/${id}`);
-      return res.data ? normalizeVendor(res.data) : null;
+      if (!res.data) return null;
+      return normalizeVendor(res.data.vendor || res.data);
     } catch {
       return null;
     }
@@ -306,7 +325,7 @@ export class ApiService {
     // 1. Try single attendee endpoint if available
     try {
       const res = await this.request<{ data: any }>(`/admin/attendees/${cleanId}`);
-      if (res?.data) return normalizeAttendee(res.data);
+      if (res?.data) return normalizeAttendee(res.data.attendee || res.data);
     } catch {
       // 404 Route not found on backend is expected
     }

@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import QRCode from 'qrcode';
 import { Vendor, VendorStatus } from '@/types';
+import DeviceInfoCard from '@/components/common/DeviceInfoCard';
 import {
   ArrowLeft,
   Copy,
@@ -401,6 +402,15 @@ export default function VendorProfileView({
                   </p>
                 </div>
               </div>
+
+              {vendor.deviceInfo && (
+                <div className="p-3 rounded-xl bg-[#F4F7FE] border border-[#E0E5F2] flex items-center justify-between text-xs">
+                  <span className="text-[10px] font-bold text-[#A3AED0] uppercase">Device / IP</span>
+                  <span className="font-bold text-[#1B254B] truncate max-w-[150px]">
+                    {vendor.deviceInfo.deviceType || vendor.deviceInfo.ip || vendor.deviceInfo.browser || 'Telemetry Captured'}
+                  </span>
+                </div>
+              )}
             </div>
           </div>
 
@@ -837,6 +847,16 @@ export default function VendorProfileView({
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Device & Client Telemetry */}
+      <div className="mt-6">
+        <DeviceInfoCard
+          deviceInfo={vendor.deviceInfo}
+          registeredAt={vendor.createdAt}
+          title="Vendor Registration Device & Telemetry"
+          subtitle="Client hardware, operating system, and network data captured during exhibitor registration"
+        />
       </div>
     </div>
   );

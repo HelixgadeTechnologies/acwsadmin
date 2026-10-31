@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import QRCode from 'qrcode';
 import { Attendee } from '@/types';
+import DeviceInfoCard from '@/components/common/DeviceInfoCard';
 import {
   ArrowLeft,
   Copy,
@@ -343,6 +344,16 @@ export default function AttendeeProfileView({
                   </span>
                 </div>
               )}
+
+              {attendee.deviceInfo && (
+                <div>
+                  <span className="text-[11px] text-[#A3AED0] block font-semibold uppercase">Registration Device</span>
+                  <span className="font-semibold text-[#1B254B] text-xs block mt-1">
+                    {attendee.deviceInfo.deviceType || attendee.deviceInfo.os || attendee.deviceInfo.browser || 'Captured'}
+                    {attendee.deviceInfo.ip && ` • IP: ${attendee.deviceInfo.ip}`}
+                  </span>
+                </div>
+              )}
             </div>
           </div>
 
@@ -482,6 +493,14 @@ export default function AttendeeProfileView({
           </div>
         </div>
       </div>
+
+      {/* Device & Client Telemetry */}
+      <DeviceInfoCard
+        deviceInfo={attendee.deviceInfo}
+        registeredAt={attendee.registeredAt || attendee.createdAt}
+        title="Attendee Registration Device & Telemetry"
+        subtitle="Client hardware, operating system, and network data captured during ticket registration"
+      />
     </div>
   );
 }

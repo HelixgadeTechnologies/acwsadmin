@@ -1,6 +1,37 @@
 export type VendorStatus = 'pending' | 'approved' | 'waitlisted' | 'rejected';
 export type PaymentTier = 'standard' | 'premium' | 'catwalk' | 'executive';
 
+export interface DeviceInfo {
+  ip?: string;
+  ipAddress?: string;
+  clientIp?: string;
+  networkIp?: string;
+  userAgent?: string;
+  ua?: string;
+  browser?: string;
+  browserName?: string;
+  browserVersion?: string;
+  os?: string;
+  osName?: string;
+  operatingSystem?: string;
+  osVersion?: string;
+  device?: string;
+  deviceType?: string;
+  deviceModel?: string;
+  platform?: string;
+  screenResolution?: string;
+  screen?: string;
+  resolution?: string;
+  language?: string;
+  locale?: string;
+  timezone?: string;
+  timeZone?: string;
+  city?: string;
+  country?: string;
+  location?: string;
+  [key: string]: any;
+}
+
 export interface Vendor {
   _id: string;
   refCode: string;
@@ -30,6 +61,7 @@ export interface Vendor {
   pricePaid?: number;
   amountPaid?: number;
   paymentStatus?: 'paid' | 'pending' | 'unpaid' | string;
+  deviceInfo?: DeviceInfo;
   createdAt: string;
   updatedAt?: string;
 }
@@ -63,6 +95,7 @@ export interface Attendee {
   privacyAcknowledged?: boolean;
   marketingConsent?: boolean;
   partnerConsent?: boolean;
+  deviceInfo?: DeviceInfo;
 }
 
 export interface KpiStats {
