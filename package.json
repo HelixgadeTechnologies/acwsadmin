@@ -6,6 +6,7 @@
     "dev": "next dev",
     "build": "opennextjs-cloudflare build",
     "build:next": "next build --webpack",
+    "deploy": "opennextjs-cloudflare build && wrangler deploy",
     "start": "next start",
     "lint": "eslint"
   },
