@@ -70,7 +70,9 @@ export default function SettingsPage() {
   const checkHealth = async () => {
     setBackendStatus('checking');
     const start = Date.now();
-    const apiBase = process.env.NEXT_PUBLIC_API_URL || 'https://acwsbackend.onrender.com/api/v1';
+    const rawBase = process.env.NEXT_PUBLIC_API_URL || 'https://brain.acwsevents.com/api/v1';
+    const clean = rawBase.replace(/\/+$/, '');
+    const apiBase = clean.endsWith('/api/v1') ? clean : `${clean}/api/v1`;
     try {
       const res = await fetch(`${apiBase}/admin/vendors/stats`, {
         headers: { 'Content-Type': 'application/json' }

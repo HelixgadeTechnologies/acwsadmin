@@ -1,6 +1,8 @@
 import { AdminUser, Attendee, KpiStats, Vendor, VendorStatus } from '@/types';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://acwsbackend.onrender.com/api/v1';
+const rawApiBase = process.env.NEXT_PUBLIC_API_URL || 'https://brain.acwsevents.com/api/v1';
+const cleanBase = rawApiBase.replace(/\/+$/, '');
+const API_BASE = cleanBase.endsWith('/api/v1') ? cleanBase : `${cleanBase}/api/v1`;
 
 // Normalizer helpers ensuring full field compatibility between Mongo and React
 function extractDeviceInfo(record: any): any {
