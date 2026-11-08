@@ -24,8 +24,40 @@ import {
   ShieldCheck,
   QrCode,
   X,
-  Share2
+  Share2,
+  PoundSterling
 } from 'lucide-react';
+
+function getAttendeeTicketAmount(attendee: Attendee): number {
+  const anyA = attendee as any;
+  if (attendee.pricePaid !== undefined && attendee.pricePaid !== null && (attendee.pricePaid as any) !== '') {
+    const parsed = typeof attendee.pricePaid === 'number' ? attendee.pricePaid : parseFloat(String(attendee.pricePaid).replace(/[^0-9.-]/g, ''));
+    if (!isNaN(parsed) && parsed > 0) return parsed;
+  }
+
+  if (attendee.ticketPrice && typeof attendee.ticketPrice === 'string') {
+    const parsed = parseFloat(attendee.ticketPrice.replace(/[^0-9.-]/g, ''));
+    if (!isNaN(parsed) && parsed > 0) return parsed;
+  }
+
+  const alt = anyA.amountPaid ?? anyA.amount ?? anyA.price;
+  if (alt !== undefined && alt !== null && alt !== '') {
+    const parsed = typeof alt === 'number' ? alt : parseFloat(String(alt).replace(/[^0-9.-]/g, ''));
+    if (!isNaN(parsed) && parsed > 0) return parsed;
+  }
+
+  const status = (attendee.paymentStatus || 'paid').toLowerCase();
+  if (status === 'complimentary' || status === 'free') {
+    return 0;
+  }
+
+  const type = (attendee.ticketType || 'standard').toLowerCase();
+  if (type.includes('catwalk')) return 85;
+  if (type.includes('vip')) return 65;
+  if (type.includes('standard')) return 25;
+
+  return 25;
+}
 
 export default function AttendeeProfileView({
   attendee: initialAttendee,
@@ -38,6 +70,8 @@ export default function AttendeeProfileView({
   const [copied, setCopied] = useState(false);
   const [qrDataUrl, setQrDataUrl] = useState<string>('');
   const [isUpdating, setIsUpdating] = useState(false);
+
+  const ticketAmount = getAttendeeTicketAmount(attendee);
 
   useEffect(() => {
     setAttendee(initialAttendee);
@@ -143,7 +177,14 @@ export default function AttendeeProfileView({
         </div>
 
         {/* Arrival Status & Gate Action */}
-        <div className="flex items-center gap-3 self-end sm:self-auto">
+        <div className="flex items-center gap-3 self-end sm:self-auto flex-wrap">
+          {/* Ticket Amount Purchased in Pounds */}
+          <div className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#10B981]/15 text-[#10B981] border border-[#10B981]/30 text-xs font-bold shadow-xs" title="Ticket Amount Purchased">
+            <PoundSterling className="w-4 h-4" />
+            <span className="font-extrabold text-sm">£{ticketAmount.toLocaleString('en-GB')}</span>
+            <span className="text-[10px] uppercase font-bold text-[#10B981]/80 ml-0.5">Paid</span>
+          </div>
+
           {attendee.checkedIn ? (
             <span className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-[#10B981]/15 text-[#10B981] border border-[#10B981]/30">
               <CheckCircle2 className="w-4 h-4" />
@@ -201,6 +242,11 @@ export default function AttendeeProfileView({
                       : 'bg-[#F4F7FE] text-[#2B3674] border-[#E0E5F2]')
                   }`}>
                   {attendee.ticketType.replace('-', ' ')}
+                </span>
+                {/* Ticket Amount in Pounds */}
+                <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-extrabold bg-[#10B981]/15 text-[#10B981] border border-[#10B981]/30">
+                  <PoundSterling className="w-3.5 h-3.5" />
+                  <span>£{ticketAmount.toLocaleString('en-GB')}</span>
                 </span>
               </div>
 
@@ -302,17 +348,25 @@ export default function AttendeeProfileView({
               </div>
 
               <div className="pt-3 border-t border-[#E0E5F2] grid grid-cols-2 gap-3">
-                <div className="p-3 rounded-xl bg-white border border-[#E0E5F2]">
-                  <span className="text-[10px] text-[#A3AED0] block font-bold uppercase">Price / Tier</span>
-                  <span className="font-extrabold text-[#1B254B] text-sm block mt-0.5">
-                    {attendee.ticketPrice || (attendee.pricePaid ? `£${attendee.pricePaid}` : 'Complimentary')}
+                <div className="p-3.5 rounded-xl bg-white border border-[#E0E5F2] shadow-2xs">
+                  <span className="text-[10px] text-[#A3AED0] block font-bold uppercase">Ticket Purchased</span>
+                  <span className="font-extrabold text-[#10B981] text-base block mt-0.5 flex items-center gap-0.5">
+                    <PoundSterling className="w-4 h-4" />
+                    <span>{ticketAmount.toLocaleString('en-GB')}</span>
+                  </span>
+                  <span className="text-[11px] text-[#707EAE] capitalize font-medium block mt-0.5">
+                    {attendee.ticketType.replace('-', ' ')} Tier
                   </span>
                 </div>
 
-                <div className="p-3 rounded-xl bg-white border border-[#E0E5F2]">
+                <div className="p-3.5 rounded-xl bg-white border border-[#E0E5F2] shadow-2xs">
                   <span className="text-[10px] text-[#A3AED0] block font-bold uppercase">Payment Status</span>
-                  <span className="font-extrabold text-[#10B981] text-sm capitalize block mt-0.5">
-                    {attendee.paymentStatus || 'Paid'}
+                  <span className="font-extrabold text-[#1B254B] text-base capitalize block mt-0.5 flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-[#10B981]" />
+                    <span>{attendee.paymentStatus || 'Paid'}</span>
+                  </span>
+                  <span className="text-[11px] text-[#707EAE] font-medium block mt-0.5">
+                    Confirmed Ticket
                   </span>
                 </div>
               </div>

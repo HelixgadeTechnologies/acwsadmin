@@ -20,8 +20,27 @@ import {
   MoreHorizontal,
   QrCode,
   Download,
-  ChevronDown
+  ChevronDown,
+  PoundSterling
 } from 'lucide-react';
+
+function getVendorTicketAmount(vendor: Vendor): number {
+  const anyV = vendor as any;
+  const explicit = anyV.pricePaid ?? anyV.amountPaid ?? anyV.amount ?? anyV.fee ?? anyV.standPrice ?? anyV.standFee;
+  if (explicit !== undefined && explicit !== null && explicit !== '') {
+    const parsed = typeof explicit === 'number' ? explicit : parseFloat(String(explicit).replace(/[^0-9.-]/g, ''));
+    if (!isNaN(parsed) && parsed > 0) return parsed;
+  }
+
+  const tier = (vendor.paymentTier || 'standard').toLowerCase();
+  const tierPricing: Record<string, number> = {
+    standard: 1250,
+    premium: 1850,
+    catwalk: 2500,
+    executive: 3500
+  };
+  return tierPricing[tier] || 1250;
+}
 
 export default function VendorProfileView({
   vendor: initialVendor,
@@ -38,6 +57,8 @@ export default function VendorProfileView({
   const [headerDropdownOpen, setHeaderDropdownOpen] = useState(false);
   const cardDropdownRef = React.useRef<HTMLDivElement>(null);
   const headerDropdownRef = React.useRef<HTMLDivElement>(null);
+
+  const ticketAmount = getVendorTicketAmount(vendor);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -276,6 +297,13 @@ export default function VendorProfileView({
             </button>
           </div>
 
+          {/* Stand Ticket Amount in Pounds */}
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#10B981]/15 text-[#10B981] border border-[#10B981]/30 shadow-xs" title="Stand Ticket Fee">
+            <PoundSterling className="w-3.5 h-3.5" />
+            <span className="text-xs font-extrabold">£{ticketAmount.toLocaleString('en-GB')}</span>
+            <span className="text-[10px] uppercase font-bold text-[#10B981]/80">Fee</span>
+          </div>
+
           <div>{getStatusBadge()}</div>
         </div>
       </div>
@@ -323,18 +351,25 @@ export default function VendorProfileView({
               )}
             </div>
 
-            <div className="grid grid-cols-3 gap-2 mt-6 pt-6 border-t border-[#E0E5F2] text-center">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-6 pt-6 border-t border-[#E0E5F2] text-center">
               <div>
+                <p className="text-xl font-extrabold text-[#10B981] flex items-center justify-center gap-0.5">
+                  <PoundSterling className="w-4 h-4" />
+                  <span>{ticketAmount.toLocaleString('en-GB')}</span>
+                </p>
+                <p className="text-xs font-medium text-[#A3AED0] mt-0.5">Ticket Fee</p>
+              </div>
+              <div className="border-l border-[#E0E5F2]">
                 <p className="text-xl font-bold text-[#2B3674] capitalize">{vendor.paymentTier || 'standard'}</p>
                 <p className="text-xs font-medium text-[#A3AED0] mt-0.5">Stand Tier</p>
               </div>
-              <div className="border-x border-[#E0E5F2]">
+              <div className="border-l border-[#E0E5F2]">
                 <p className="text-xl font-bold text-[#2B3674]">
                   {vendor.weddingVolume && vendor.weddingVolume !== 'Not specified' ? vendor.weddingVolume.split(' ')[0] : 'No data'}
                 </p>
                 <p className="text-xs font-medium text-[#A3AED0] mt-0.5">Weddings/Yr</p>
               </div>
-              <div>
+              <div className="border-l border-[#E0E5F2]">
                 <p className="text-xl font-bold text-[#2B3674]">
                   {vendor.typicalSpend && vendor.typicalSpend !== 'Not specified' ? vendor.typicalSpend.split(' ')[0] : 'No data'}
                 </p>
@@ -415,8 +450,14 @@ export default function VendorProfileView({
           </div>
 
           <div className="mt-4 pt-3.5 border-t border-[#E0E5F2] flex items-center justify-between text-xs">
-            <span className="text-[#A3AED0] font-medium">Stand Tier:</span>
-            <span className="font-bold text-[#1B254B] capitalize">{vendor.paymentTier || 'standard'}</span>
+            <span className="text-[#A3AED0] font-medium">Stand Tier & Fee:</span>
+            <div className="flex items-center gap-2">
+              <span className="font-bold text-[#1B254B] capitalize">{vendor.paymentTier || 'standard'}</span>
+              <span className="font-extrabold text-[#10B981] bg-[#10B981]/15 border border-[#10B981]/30 px-2.5 py-0.5 rounded-lg flex items-center gap-0.5">
+                <PoundSterling className="w-3 h-3" />
+                <span>{ticketAmount.toLocaleString('en-GB')}</span>
+              </span>
+            </div>
           </div>
         </div>
 
