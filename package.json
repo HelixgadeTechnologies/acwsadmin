@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "NEXT_TELEMETRY_DISABLED=1 opennextjs-cloudflare build",
     "build:next": "NEXT_TELEMETRY_DISABLED=1 next build --webpack",
-    "deploy": "NEXT_TELEMETRY_DISABLED=1 opennextjs-cloudflare build && wrangler deploy",
+    "deploy": "wrangler deploy",
     "start": "next start",
     "lint": "eslint"
   },
