@@ -271,15 +271,14 @@ export default function VendorsDirectory({
                 <th className="py-4.5 px-4">Location</th>
                 <th className="py-4.5 px-4">Stand Tier</th>
                 <th className="py-4.5 px-4">Status</th>
-                <th className="py-4.5 px-4">Date</th>
-                <th className="py-4.5 px-4">Time</th>
+                <th className="py-4.5 px-4">Registration Date</th>
                 <th className="py-4.5 pr-6 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#E0E5F2]">
               {paginatedVendors.length === 0 ? (
                 <tr>
-                  <td colSpan={9} className="text-center py-16 text-[#A3AED0] text-sm font-semibold">
+                  <td colSpan={8} className="text-center py-16 text-[#A3AED0] text-sm font-semibold">
                     No data
                   </td>
                 </tr>
@@ -340,21 +339,6 @@ export default function VendorsDirectory({
                           })
                         ) : (
                           <span className="text-[#A3AED0] text-xs">No data</span>
-                        )}
-                      </td>
-                      <td className="py-5 px-4 whitespace-nowrap">
-                        {isValidDate ? (
-                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#F4F7FE] border border-[#E0E5F2] font-mono text-[11px] text-[#1B254B]">
-                            <Clock className="w-3 h-3 text-[#B58E29]" />
-                            <span>
-                              {dateObj!.toLocaleTimeString('en-GB', {
-                                hour: '2-digit',
-                                minute: '2-digit'
-                              })}
-                            </span>
-                          </span>
-                        ) : (
-                          <span className="text-[#A3AED0] text-xs">--:--</span>
                         )}
                       </td>
                       <td className="py-5 pr-6 text-right">

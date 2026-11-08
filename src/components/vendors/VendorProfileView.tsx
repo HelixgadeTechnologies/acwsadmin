@@ -160,6 +160,26 @@ export default function VendorProfileView({
           <h1 className="text-2xl lg:text-3xl font-extrabold text-[#1B254B] tracking-tight">
             Vendor Profile
           </h1>
+          {vendor.createdAt && (
+            <p className="text-xs text-[#707EAE] mt-0.5 flex items-center gap-1.5">
+              <Clock className="w-3.5 h-3.5 text-[#B58E29]" />
+              <span>
+                Registered on{' '}
+                {new Date(vendor.createdAt).toLocaleDateString('en-GB', {
+                  day: 'numeric',
+                  month: 'long',
+                  year: 'numeric'
+                })}{' '}
+                at{' '}
+                <strong className="text-[#1B254B]">
+                  {new Date(vendor.createdAt).toLocaleTimeString('en-GB', {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  })}
+                </strong>
+              </span>
+            </p>
+          )}
         </div>
 
         <div className="flex items-center gap-3">
@@ -393,16 +413,31 @@ export default function VendorProfileView({
 
             <div className="space-y-3.5 mt-2">
               <div className="p-3.5 rounded-xl bg-[#F4F7FE] border border-[#E0E5F2]">
-                <p className="text-[11px] font-bold text-[#A3AED0] uppercase tracking-wider">Registered At</p>
-                <p className="text-xs font-bold text-[#1B254B] mt-1">
-                  {new Date(vendor.createdAt).toLocaleDateString('en-GB', {
-                    day: 'numeric',
-                    month: 'short',
-                    year: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit'
-                  })}
-                </p>
+                <div className="flex items-center justify-between">
+                  <p className="text-[11px] font-bold text-[#A3AED0] uppercase tracking-wider">Registration Date & Time</p>
+                  <Clock className="w-3.5 h-3.5 text-[#B58E29]" />
+                </div>
+                <div className="mt-1 flex items-center justify-between gap-2 flex-wrap">
+                  <span className="text-xs font-bold text-[#1B254B]">
+                    {vendor.createdAt ? (
+                      new Date(vendor.createdAt).toLocaleDateString('en-GB', {
+                        day: 'numeric',
+                        month: 'short',
+                        year: 'numeric'
+                      })
+                    ) : (
+                      'No data'
+                    )}
+                  </span>
+                  {vendor.createdAt && (
+                    <span className="font-mono text-xs font-bold text-[#8F6E1C] bg-[#FFF9E6] px-2 py-0.5 rounded-md border border-[#F3DC82]">
+                      {new Date(vendor.createdAt).toLocaleTimeString('en-GB', {
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      })}
+                    </span>
+                  )}
+                </div>
               </div>
 
               <div className="p-3.5 rounded-xl bg-[#F4F7FE] border border-[#E0E5F2]">
