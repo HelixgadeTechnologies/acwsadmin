@@ -62,6 +62,7 @@ export interface Vendor {
   amountPaid?: number;
   paymentStatus?: 'paid' | 'pending' | 'unpaid' | string;
   deviceInfo?: DeviceInfo;
+  registrationDevice?: DeviceInfo;
   createdAt: string;
   updatedAt?: string;
 }
@@ -96,6 +97,7 @@ export interface Attendee {
   marketingConsent?: boolean;
   partnerConsent?: boolean;
   deviceInfo?: DeviceInfo;
+  registrationDevice?: DeviceInfo;
 }
 
 export interface KpiStats {

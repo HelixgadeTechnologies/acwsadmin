@@ -6,7 +6,7 @@ const API_BASE = cleanBase.endsWith('/api/v1') ? cleanBase : `${cleanBase}/api/v
 
 // Normalizer helpers ensuring full field compatibility between Mongo and React
 function extractDeviceInfo(record: any): any {
-  const rawDev = record?.deviceInfo ?? record?.device ?? record?.deviceMetadata ?? record?.clientInfo ?? record?.metadata?.deviceInfo;
+  const rawDev = record?.registrationDevice ?? record?.deviceInfo ?? record?.device ?? record?.deviceMetadata ?? record?.clientInfo ?? record?.metadata?.deviceInfo;
   if (!rawDev) return undefined;
   if (typeof rawDev === 'string') {
     try {
