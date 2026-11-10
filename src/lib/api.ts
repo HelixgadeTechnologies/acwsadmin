@@ -23,6 +23,20 @@ function extractDeviceInfo(record: any): any {
 
 function normalizeVendor(v: any): Vendor {
   if (!v) return v;
+  const dev = extractDeviceInfo(v);
+  const loc = v.locationData || v.location;
+  const enrichedDevice = dev
+    ? {
+        ...dev,
+        city: dev.city || loc?.city,
+        region: dev.region || loc?.region,
+        country: dev.country || loc?.country,
+        countryCode: dev.countryCode || loc?.countryCode,
+        latitude: dev.latitude || loc?.latitude,
+        longitude: dev.longitude || loc?.longitude,
+      }
+    : undefined;
+
   return {
     ...v,
     contactName: v.contactName || v.contactPerson || '',
@@ -32,20 +46,38 @@ function normalizeVendor(v: any): Vendor {
     curatorNotes: v.curatorNotes || v.notes || '',
     paymentTier: v.paymentTier || 'standard',
     status: v.status || 'pending',
-    deviceInfo: extractDeviceInfo(v),
+    deviceInfo: enrichedDevice,
+    registrationDevice: enrichedDevice,
+    locationData: loc,
     createdAt: v.createdAt || new Date().toISOString()
   };
 }
 
 function normalizeAttendee(a: any): Attendee {
   if (!a) return a;
+  const dev = extractDeviceInfo(a);
+  const loc = a.locationData || a.location;
+  const enrichedDevice = dev
+    ? {
+        ...dev,
+        city: dev.city || loc?.city,
+        region: dev.region || loc?.region,
+        country: dev.country || loc?.country,
+        countryCode: dev.countryCode || loc?.countryCode,
+        latitude: dev.latitude || loc?.latitude,
+        longitude: dev.longitude || loc?.longitude,
+      }
+    : undefined;
+
   return {
     ...a,
     _id: a._id || a.id || '',
     phone: a.phone || a.phoneNumber || a.telephone || a.mobile || a.contactPhone || '',
     registeredAt: a.registeredAt || a.createdAt || new Date().toISOString(),
     checkedIn: Boolean(a.checkedIn),
-    deviceInfo: extractDeviceInfo(a)
+    deviceInfo: enrichedDevice,
+    registrationDevice: enrichedDevice,
+    locationData: loc
   };
 }
 
